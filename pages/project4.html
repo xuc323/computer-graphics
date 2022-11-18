@@ -5,7 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>CSE 313 Project 4</title>
-    <!-- scripts -->
+    <!-- Fragment shader -->
     <script id="shader-fs" type="x-shader/x-fragment">
       // sets the precision of vColor
       precision mediump float;
@@ -25,6 +25,8 @@
         gl_FragColor = vec4(textureColor.rgb * vLightWeighting, textureColor.a);
       }
     </script>
+    <!-- Fragment shader -->
+    <!-- Vertex shader -->
     <script id="shader-vs" type="x-shader/x-vertex">
       // Attributes are inputs provided for each vertex,
       // different for each vertex in the rendering call input: vertex position
@@ -69,6 +71,7 @@
         }
       }
     </script>
+    <!-- Vertex shader -->
     <script type="text/javascript" src="../lib/gl-matrix-2.7.0.min.js"></script>
     <script type="text/javascript" src="../lib/webgl-utils.js"></script>
     <script type="text/javascript">
@@ -211,24 +214,58 @@
       ///////////////////////////////////////////
 
       var sunBuffers = {
-        // vertex position buffer
-        positionBuffer: null,
-        // vertex texture coordinate buffer
-        textureCoordBuffer: null,
-        // vertex normal buffer
-        normBuffer: null,
-        // texture buffer
-        texture: null,
+        positionBuffer: null, // vertex position buffer
+        textureCoordBuffer: null, // vertex texture coordinate buffer
+        normBuffer: null, // vertex normal buffer
+        texture: null, // texture buffer
+      };
+      var mercuryBuffers = {
+        positionBuffer: null, // vertex position buffer
+        textureCoordBuffer: null, // vertex texture coordinate buffer
+        normBuffer: null, // vertex normal buffer
+        texture: null, // texture buffer
+      };
+      var venusBuffers = {
+        positionBuffer: null, // vertex position buffer
+        textureCoordBuffer: null, // vertex texture coordinate buffer
+        normBuffer: null, // vertex normal buffer
+        texture: null, // texture buffer
       };
       var earthBuffers = {
-        // vertex position buffer
-        positionBuffer: null,
-        // vertex texture coordinate buffer
-        textureCoordBuffer: null,
-        // vertex normal buffer
-        normBuffer: null,
-        // texture buffer
-        texture: null,
+        positionBuffer: null, // vertex position buffer
+        textureCoordBuffer: null, // vertex texture coordinate buffer
+        normBuffer: null, // vertex normal buffer
+        texture: null, // texture buffer
+      };
+      var marsBuffers = {
+        positionBuffer: null, // vertex position buffer
+        textureCoordBuffer: null, // vertex texture coordinate buffer
+        normBuffer: null, // vertex normal buffer
+        texture: null, // texture buffer
+      };
+      var jupiterBuffers = {
+        positionBuffer: null, // vertex position buffer
+        textureCoordBuffer: null, // vertex texture coordinate buffer
+        normBuffer: null, // vertex normal buffer
+        texture: null, // texture buffer
+      };
+      var saturnBuffers = {
+        positionBuffer: null, // vertex position buffer
+        textureCoordBuffer: null, // vertex texture coordinate buffer
+        normBuffer: null, // vertex normal buffer
+        texture: null, // texture buffer
+      };
+      var uranusBuffers = {
+        positionBuffer: null, // vertex position buffer
+        textureCoordBuffer: null, // vertex texture coordinate buffer
+        normBuffer: null, // vertex normal buffer
+        texture: null, // texture buffer
+      };
+      var neptuneBuffers = {
+        positionBuffer: null, // vertex position buffer
+        textureCoordBuffer: null, // vertex texture coordinate buffer
+        normBuffer: null, // vertex normal buffer
+        texture: null, // texture buffer
       };
 
       // We will generate the geometry with this function
@@ -237,7 +274,7 @@
          * START SUN BUFFER
          *************************/
         // Create a buffer for the sun's vertices.
-        let radius = 1.0,
+        let radius = 0.65,
           slices = 25,
           stacks = 12;
         let { vertices, normals, textureCoords } = createSphere(
@@ -284,9 +321,103 @@
          * END SUN BUFFER
          *************************/
         /*************************
+         * START MERCURY BUFFER
+         *************************/
+        radius = 0.08;
+        slices = 25;
+        stacks = 12;
+        ({ vertices, normals, textureCoords } = createSphere(
+          radius,
+          slices,
+          stacks
+        ));
+        // positions
+        mercuryBuffers.positionBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, mercuryBuffers.positionBuffer);
+        gl.bufferData(
+          gl.ARRAY_BUFFER,
+          new Float32Array(vertices),
+          gl.STATIC_DRAW
+        );
+        mercuryBuffers.positionBuffer.itemSize = 3;
+        mercuryBuffers.positionBuffer.numItems = 6 * (slices + 1) * stacks;
+
+        // texture coordinates
+        mercuryBuffers.textureCoordBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, mercuryBuffers.textureCoordBuffer);
+        gl.bufferData(
+          gl.ARRAY_BUFFER,
+          new Float32Array(textureCoords),
+          gl.STATIC_DRAW
+        );
+        mercuryBuffers.textureCoordBuffer.itemSize = 2;
+        mercuryBuffers.textureCoordBuffer.numItems = 6 * (slices + 1) * stacks;
+
+        // normals
+        mercuryBuffers.normBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, mercuryBuffers.normBuffer);
+        gl.bufferData(
+          gl.ARRAY_BUFFER,
+          new Float32Array(normals),
+          gl.STATIC_DRAW
+        );
+        mercuryBuffers.normBuffer.itemSize = 3;
+        mercuryBuffers.normBuffer.numItems = 6 * (slices + 1) * stacks;
+        gl.bindBuffer(gl.ARRAY_BUFFER, null);
+        /*************************
+         * END MERCURY BUFFER
+         *************************/
+        /*************************
+         * START VENUS BUFFER
+         *************************/
+        radius = 0.15;
+        slices = 25;
+        stacks = 12;
+        ({ vertices, normals, textureCoords } = createSphere(
+          radius,
+          slices,
+          stacks
+        ));
+        // positions
+        venusBuffers.positionBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, venusBuffers.positionBuffer);
+        gl.bufferData(
+          gl.ARRAY_BUFFER,
+          new Float32Array(vertices),
+          gl.STATIC_DRAW
+        );
+        venusBuffers.positionBuffer.itemSize = 3;
+        venusBuffers.positionBuffer.numItems = 6 * (slices + 1) * stacks;
+
+        // texture coordinates
+        venusBuffers.textureCoordBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, venusBuffers.textureCoordBuffer);
+        gl.bufferData(
+          gl.ARRAY_BUFFER,
+          new Float32Array(textureCoords),
+          gl.STATIC_DRAW
+        );
+        venusBuffers.textureCoordBuffer.itemSize = 2;
+        venusBuffers.textureCoordBuffer.numItems = 6 * (slices + 1) * stacks;
+
+        // normals
+        venusBuffers.normBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, venusBuffers.normBuffer);
+        gl.bufferData(
+          gl.ARRAY_BUFFER,
+          new Float32Array(normals),
+          gl.STATIC_DRAW
+        );
+        venusBuffers.normBuffer.itemSize = 3;
+        venusBuffers.normBuffer.numItems = 6 * (slices + 1) * stacks;
+        gl.bindBuffer(gl.ARRAY_BUFFER, null);
+        /*************************
+         * END VENUS BUFFER
+         *************************/
+        /*************************
          * START EARTH BUFFER
          *************************/
-        radius = 0.5;
+        radius = 0.18;
         slices = 25;
         stacks = 12;
         ({ vertices, normals, textureCoords } = createSphere(
@@ -329,6 +460,241 @@
         gl.bindBuffer(gl.ARRAY_BUFFER, null);
         /*************************
          * END EARTH BUFFER
+         *************************/
+        /*************************
+         * START MARS BUFFER
+         ************************/
+        radius = 0.2;
+        slices = 25;
+        stacks = 12;
+        ({ vertices, normals, textureCoords } = createSphere(
+          radius,
+          slices,
+          stacks
+        ));
+        // positions
+        marsBuffers.positionBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, marsBuffers.positionBuffer);
+        gl.bufferData(
+          gl.ARRAY_BUFFER,
+          new Float32Array(vertices),
+          gl.STATIC_DRAW
+        );
+        marsBuffers.positionBuffer.itemSize = 3;
+        marsBuffers.positionBuffer.numItems = 6 * (slices + 1) * stacks;
+
+        // texture coordinates
+        marsBuffers.textureCoordBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, marsBuffers.textureCoordBuffer);
+        gl.bufferData(
+          gl.ARRAY_BUFFER,
+          new Float32Array(textureCoords),
+          gl.STATIC_DRAW
+        );
+        marsBuffers.textureCoordBuffer.itemSize = 2;
+        marsBuffers.textureCoordBuffer.numItems = 6 * (slices + 1) * stacks;
+
+        // normals
+        marsBuffers.normBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, marsBuffers.normBuffer);
+        gl.bufferData(
+          gl.ARRAY_BUFFER,
+          new Float32Array(normals),
+          gl.STATIC_DRAW
+        );
+        marsBuffers.normBuffer.itemSize = 3;
+        marsBuffers.normBuffer.numItems = 6 * (slices + 1) * stacks;
+        gl.bindBuffer(gl.ARRAY_BUFFER, null);
+        /*************************
+         * END MARS BUFFER
+         *************************/
+        /*************************
+         * START JUPITER BUFFER
+         *************************/
+        radius = 0.26;
+        slices = 25;
+        stacks = 12;
+        ({ vertices, normals, textureCoords } = createSphere(
+          radius,
+          slices,
+          stacks
+        ));
+        // positions
+        jupiterBuffers.positionBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, jupiterBuffers.positionBuffer);
+        gl.bufferData(
+          gl.ARRAY_BUFFER,
+          new Float32Array(vertices),
+          gl.STATIC_DRAW
+        );
+        jupiterBuffers.positionBuffer.itemSize = 3;
+        jupiterBuffers.positionBuffer.numItems = 6 * (slices + 1) * stacks;
+
+        // texture coordinates
+        jupiterBuffers.textureCoordBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, jupiterBuffers.textureCoordBuffer);
+        gl.bufferData(
+          gl.ARRAY_BUFFER,
+          new Float32Array(textureCoords),
+          gl.STATIC_DRAW
+        );
+        jupiterBuffers.textureCoordBuffer.itemSize = 2;
+        jupiterBuffers.textureCoordBuffer.numItems = 6 * (slices + 1) * stacks;
+
+        // normals
+        jupiterBuffers.normBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, jupiterBuffers.normBuffer);
+        gl.bufferData(
+          gl.ARRAY_BUFFER,
+          new Float32Array(normals),
+          gl.STATIC_DRAW
+        );
+        jupiterBuffers.normBuffer.itemSize = 3;
+        jupiterBuffers.normBuffer.numItems = 6 * (slices + 1) * stacks;
+        gl.bindBuffer(gl.ARRAY_BUFFER, null);
+        /*************************
+         * END JUPITER BUFFER
+         *************************/
+        /*************************
+         * START SATURN BUFFER
+         *************************/
+        radius = 0.28;
+        slices = 25;
+        stacks = 12;
+        ({ vertices, normals, textureCoords } = createSphere(
+          radius,
+          slices,
+          stacks
+        ));
+        // positions
+        saturnBuffers.positionBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, saturnBuffers.positionBuffer);
+        gl.bufferData(
+          gl.ARRAY_BUFFER,
+          new Float32Array(vertices),
+          gl.STATIC_DRAW
+        );
+        saturnBuffers.positionBuffer.itemSize = 3;
+        saturnBuffers.positionBuffer.numItems = 6 * (slices + 1) * stacks;
+
+        // texture coordinates
+        saturnBuffers.textureCoordBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, saturnBuffers.textureCoordBuffer);
+        gl.bufferData(
+          gl.ARRAY_BUFFER,
+          new Float32Array(textureCoords),
+          gl.STATIC_DRAW
+        );
+        saturnBuffers.textureCoordBuffer.itemSize = 2;
+        saturnBuffers.textureCoordBuffer.numItems = 6 * (slices + 1) * stacks;
+
+        // normals
+        saturnBuffers.normBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, saturnBuffers.normBuffer);
+        gl.bufferData(
+          gl.ARRAY_BUFFER,
+          new Float32Array(normals),
+          gl.STATIC_DRAW
+        );
+        saturnBuffers.normBuffer.itemSize = 3;
+        saturnBuffers.normBuffer.numItems = 6 * (slices + 1) * stacks;
+        gl.bindBuffer(gl.ARRAY_BUFFER, null);
+        /*************************
+         * END SATURN BUFFER
+         *************************/
+        /*************************
+         * START URANUS BUFFER
+         *************************/
+        radius = 0.22;
+        slices = 25;
+        stacks = 12;
+        ({ vertices, normals, textureCoords } = createSphere(
+          radius,
+          slices,
+          stacks
+        ));
+        // positions
+        uranusBuffers.positionBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, uranusBuffers.positionBuffer);
+        gl.bufferData(
+          gl.ARRAY_BUFFER,
+          new Float32Array(vertices),
+          gl.STATIC_DRAW
+        );
+        uranusBuffers.positionBuffer.itemSize = 3;
+        uranusBuffers.positionBuffer.numItems = 6 * (slices + 1) * stacks;
+
+        // texture coordinates
+        uranusBuffers.textureCoordBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, uranusBuffers.textureCoordBuffer);
+        gl.bufferData(
+          gl.ARRAY_BUFFER,
+          new Float32Array(textureCoords),
+          gl.STATIC_DRAW
+        );
+        uranusBuffers.textureCoordBuffer.itemSize = 2;
+        uranusBuffers.textureCoordBuffer.numItems = 6 * (slices + 1) * stacks;
+
+        // normals
+        uranusBuffers.normBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, uranusBuffers.normBuffer);
+        gl.bufferData(
+          gl.ARRAY_BUFFER,
+          new Float32Array(normals),
+          gl.STATIC_DRAW
+        );
+        uranusBuffers.normBuffer.itemSize = 3;
+        uranusBuffers.normBuffer.numItems = 6 * (slices + 1) * stacks;
+        gl.bindBuffer(gl.ARRAY_BUFFER, null);
+        /*************************
+         * END URANUS BUFFER
+         *************************/
+        /*************************
+         * START NEPTUNE BUFFER
+         *************************/
+        radius = 0.21;
+        slices = 25;
+        stacks = 12;
+        ({ vertices, normals, textureCoords } = createSphere(
+          radius,
+          slices,
+          stacks
+        ));
+        // positions
+        neptuneBuffers.positionBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, neptuneBuffers.positionBuffer);
+        gl.bufferData(
+          gl.ARRAY_BUFFER,
+          new Float32Array(vertices),
+          gl.STATIC_DRAW
+        );
+        neptuneBuffers.positionBuffer.itemSize = 3;
+        neptuneBuffers.positionBuffer.numItems = 6 * (slices + 1) * stacks;
+
+        // texture coordinates
+        neptuneBuffers.textureCoordBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, neptuneBuffers.textureCoordBuffer);
+        gl.bufferData(
+          gl.ARRAY_BUFFER,
+          new Float32Array(textureCoords),
+          gl.STATIC_DRAW
+        );
+        neptuneBuffers.textureCoordBuffer.itemSize = 2;
+        neptuneBuffers.textureCoordBuffer.numItems = 6 * (slices + 1) * stacks;
+
+        // normals
+        neptuneBuffers.normBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, neptuneBuffers.normBuffer);
+        gl.bufferData(
+          gl.ARRAY_BUFFER,
+          new Float32Array(normals),
+          gl.STATIC_DRAW
+        );
+        neptuneBuffers.normBuffer.itemSize = 3;
+        neptuneBuffers.normBuffer.numItems = 6 * (slices + 1) * stacks;
+        gl.bindBuffer(gl.ARRAY_BUFFER, null);
+        /*************************
+         * END NEPTUNE BUFFER
          *************************/
       }
 
@@ -478,6 +844,22 @@
         };
         sunBuffers.texture.image.src = "../assets/sun.gif";
 
+        // mercury texture
+        mercuryBuffers.texture = gl.createTexture();
+        mercuryBuffers.texture.image = new Image();
+        mercuryBuffers.texture.image.onload = function () {
+          handleLoadedTexture(mercuryBuffers.texture);
+        };
+        mercuryBuffers.texture.image.src = "../assets/mercury.gif";
+
+        // venus texture
+        venusBuffers.texture = gl.createTexture();
+        venusBuffers.texture.image = new Image();
+        venusBuffers.texture.image.onload = function () {
+          handleLoadedTexture(venusBuffers.texture);
+        };
+        venusBuffers.texture.image.src = "../assets/venus.gif";
+
         // earth texture
         earthBuffers.texture = gl.createTexture();
         earthBuffers.texture.image = new Image();
@@ -485,6 +867,46 @@
           handleLoadedTexture(earthBuffers.texture);
         };
         earthBuffers.texture.image.src = "../assets/earth.gif";
+
+        // mars texture
+        marsBuffers.texture = gl.createTexture();
+        marsBuffers.texture.image = new Image();
+        marsBuffers.texture.image.onload = function () {
+          handleLoadedTexture(marsBuffers.texture);
+        };
+        marsBuffers.texture.image.src = "../assets/mars.gif";
+
+        // jupiter texture
+        jupiterBuffers.texture = gl.createTexture();
+        jupiterBuffers.texture.image = new Image();
+        jupiterBuffers.texture.image.onload = function () {
+          handleLoadedTexture(jupiterBuffers.texture);
+        };
+        jupiterBuffers.texture.image.src = "../assets/jupiter.gif";
+
+        // saturn texture
+        saturnBuffers.texture = gl.createTexture();
+        saturnBuffers.texture.image = new Image();
+        saturnBuffers.texture.image.onload = function () {
+          handleLoadedTexture(saturnBuffers.texture);
+        };
+        saturnBuffers.texture.image.src = "../assets/saturn.gif";
+
+        // uranus texture
+        uranusBuffers.texture = gl.createTexture();
+        uranusBuffers.texture.image = new Image();
+        uranusBuffers.texture.image.onload = function () {
+          handleLoadedTexture(uranusBuffers.texture);
+        };
+        uranusBuffers.texture.image.src = "../assets/uranus.gif";
+
+        // neptune texture
+        neptuneBuffers.texture = gl.createTexture();
+        neptuneBuffers.texture.image = new Image();
+        neptuneBuffers.texture.image.onload = function () {
+          handleLoadedTexture(neptuneBuffers.texture);
+        };
+        neptuneBuffers.texture.image.src = "../assets/neptune.gif";
       }
 
       // reads the texture image and saves it to the variable provided
@@ -556,7 +978,8 @@
         mat4.identity(mvMatrix);
         // set the position of the sphere
         mat4.translate(mvMatrix, mvMatrix, [0, 0, -7.0]);
-        mat4.rotate(mvMatrix, mvMatrix, degToRad(xRot), [0, 1, 0]);
+        mat4.rotate(mvMatrix, mvMatrix, 90, [1, 0, 0]);
+        mat4.rotate(mvMatrix, mvMatrix, degToRad(xRot), [0, 0, 1]);
 
         // positions
         gl.bindBuffer(gl.ARRAY_BUFFER, sunBuffers.positionBuffer);
@@ -594,7 +1017,6 @@
         gl.activeTexture(gl.TEXTURE0);
         gl.bindTexture(gl.TEXTURE_2D, sunBuffers.texture);
         gl.uniform1i(shaderProgram.samplerUniform, 0);
-
         // set uniform variable in vertex shader
         setMatrixUniforms();
         // draw the triangles
@@ -604,11 +1026,112 @@
          * END DRAWING SUN
          *************************/
         /*************************
+         * START DRAWING MERCURY
+         *************************/
+        mat4.identity(mvMatrix);
+        mat4.translate(mvMatrix, mvMatrix, [0.9, 0, -7.0]);
+        mat4.rotate(mvMatrix, mvMatrix, 90, [1, 0, 0]);
+        mat4.rotate(mvMatrix, mvMatrix, degToRad(xRot), [0, 0, 1]);
+
+        // positions
+        gl.bindBuffer(gl.ARRAY_BUFFER, mercuryBuffers.positionBuffer);
+        gl.vertexAttribPointer(
+          shaderProgram.vertexPositionAttribute,
+          mercuryBuffers.positionBuffer.itemSize,
+          gl.FLOAT,
+          false,
+          0,
+          0
+        );
+
+        // normals
+        gl.bindBuffer(gl.ARRAY_BUFFER, mercuryBuffers.normBuffer);
+        gl.vertexAttribPointer(
+          shaderProgram.vertexNormalAttribute,
+          mercuryBuffers.normBuffer.itemSize,
+          gl.FLOAT,
+          false,
+          0,
+          0
+        );
+
+        // texture coordinates
+        gl.bindBuffer(gl.ARRAY_BUFFER, mercuryBuffers.textureCoordBuffer);
+        gl.vertexAttribPointer(
+          shaderProgram.textureCoordAttribute,
+          mercuryBuffers.textureCoordBuffer.itemSize,
+          gl.FLOAT,
+          false,
+          0,
+          0
+        );
+
+        gl.activeTexture(gl.TEXTURE0);
+        gl.bindTexture(gl.TEXTURE_2D, mercuryBuffers.texture);
+        gl.uniform1i(shaderProgram.samplerUniform, 0);
+        setMatrixUniforms();
+        gl.drawArrays(gl.TRIANGLES, 0, mercuryBuffers.positionBuffer.numItems);
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
+        /*************************
+         * END DRAWING MERCURY
+         *************************/
+        /*************************
+         * START DRAWING VENUS
+         *************************/
+        mat4.identity(mvMatrix);
+        mat4.translate(mvMatrix, mvMatrix, [1.3, 0, -7.0]);
+        mat4.rotate(mvMatrix, mvMatrix, 90, [1, 0, 0]);
+        mat4.rotate(mvMatrix, mvMatrix, degToRad(xRot), [0, 0, 1]);
+
+        // positions
+        gl.bindBuffer(gl.ARRAY_BUFFER, venusBuffers.positionBuffer);
+        gl.vertexAttribPointer(
+          shaderProgram.vertexPositionAttribute,
+          venusBuffers.positionBuffer.itemSize,
+          gl.FLOAT,
+          false,
+          0,
+          0
+        );
+
+        // normals
+        gl.bindBuffer(gl.ARRAY_BUFFER, venusBuffers.normBuffer);
+        gl.vertexAttribPointer(
+          shaderProgram.vertexNormalAttribute,
+          venusBuffers.normBuffer.itemSize,
+          gl.FLOAT,
+          false,
+          0,
+          0
+        );
+
+        // texture coordinates
+        gl.bindBuffer(gl.ARRAY_BUFFER, venusBuffers.textureCoordBuffer);
+        gl.vertexAttribPointer(
+          shaderProgram.textureCoordAttribute,
+          venusBuffers.textureCoordBuffer.itemSize,
+          gl.FLOAT,
+          false,
+          0,
+          0
+        );
+
+        gl.activeTexture(gl.TEXTURE0);
+        gl.bindTexture(gl.TEXTURE_2D, venusBuffers.texture);
+        gl.uniform1i(shaderProgram.samplerUniform, 0);
+        setMatrixUniforms();
+        gl.drawArrays(gl.TRIANGLES, 0, venusBuffers.positionBuffer.numItems);
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
+        /*************************
+         * END DRAWING VENUS
+         *************************/
+        /*************************
          * START DRAWING EARTH
          *************************/
         mat4.identity(mvMatrix);
-        mat4.translate(mvMatrix, mvMatrix, [2, 0, -7.0]);
-        mat4.rotate(mvMatrix, mvMatrix, degToRad(xRot), [0, 1, 0]);
+        mat4.translate(mvMatrix, mvMatrix, [1.8, 0, -7.0]);
+        mat4.rotate(mvMatrix, mvMatrix, 90, [1, 0, 0]);
+        mat4.rotate(mvMatrix, mvMatrix, degToRad(xRot), [0, 0, 1]);
 
         // positions
         gl.bindBuffer(gl.ARRAY_BUFFER, earthBuffers.positionBuffer);
@@ -646,13 +1169,259 @@
         gl.activeTexture(gl.TEXTURE0);
         gl.bindTexture(gl.TEXTURE_2D, earthBuffers.texture);
         gl.uniform1i(shaderProgram.samplerUniform, 0);
-
         setMatrixUniforms();
         gl.drawArrays(gl.TRIANGLES, 0, earthBuffers.positionBuffer.numItems);
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
         /*************************
          * END DRAWING EARTH
          *************************/
+        /*************************
+         * START DRAWING MARS
+         *************************/
+        mat4.identity(mvMatrix);
+        mat4.translate(mvMatrix, mvMatrix, [2.4, 0, -7.0]);
+        mat4.rotate(mvMatrix, mvMatrix, 90, [1, 0, 0]);
+        mat4.rotate(mvMatrix, mvMatrix, degToRad(xRot), [0, 0, 1]);
+
+        // positions
+        gl.bindBuffer(gl.ARRAY_BUFFER, marsBuffers.positionBuffer);
+        gl.vertexAttribPointer(
+          shaderProgram.vertexPositionAttribute,
+          marsBuffers.positionBuffer.itemSize,
+          gl.FLOAT,
+          false,
+          0,
+          0
+        );
+
+        // normals
+        gl.bindBuffer(gl.ARRAY_BUFFER, marsBuffers.normBuffer);
+        gl.vertexAttribPointer(
+          shaderProgram.vertexNormalAttribute,
+          marsBuffers.normBuffer.itemSize,
+          gl.FLOAT,
+          false,
+          0,
+          0
+        );
+
+        // texture coordinates
+        gl.bindBuffer(gl.ARRAY_BUFFER, marsBuffers.textureCoordBuffer);
+        gl.vertexAttribPointer(
+          shaderProgram.textureCoordAttribute,
+          marsBuffers.textureCoordBuffer.itemSize,
+          gl.FLOAT,
+          false,
+          0,
+          0
+        );
+
+        gl.activeTexture(gl.TEXTURE0);
+        gl.bindTexture(gl.TEXTURE_2D, marsBuffers.texture);
+        gl.uniform1i(shaderProgram.samplerUniform, 0);
+        setMatrixUniforms();
+        gl.drawArrays(gl.TRIANGLES, 0, marsBuffers.positionBuffer.numItems);
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
+        /*************************
+         * END DRAWING MARS
+         *************************/
+        /*************************
+         * START DRAWING JUPITER
+         *************************/
+        mat4.identity(mvMatrix);
+        mat4.translate(mvMatrix, mvMatrix, [3.25, 0, -7.0]);
+        mat4.rotate(mvMatrix, mvMatrix, 90, [1, 0, 0]);
+        mat4.rotate(mvMatrix, mvMatrix, degToRad(xRot), [0, 0, 1]);
+
+        // positions
+        gl.bindBuffer(gl.ARRAY_BUFFER, jupiterBuffers.positionBuffer);
+        gl.vertexAttribPointer(
+          shaderProgram.vertexPositionAttribute,
+          jupiterBuffers.positionBuffer.itemSize,
+          gl.FLOAT,
+          false,
+          0,
+          0
+        );
+
+        // normals
+        gl.bindBuffer(gl.ARRAY_BUFFER, jupiterBuffers.normBuffer);
+        gl.vertexAttribPointer(
+          shaderProgram.vertexNormalAttribute,
+          jupiterBuffers.normBuffer.itemSize,
+          gl.FLOAT,
+          false,
+          0,
+          0
+        );
+
+        // texture coordinates
+        gl.bindBuffer(gl.ARRAY_BUFFER, jupiterBuffers.textureCoordBuffer);
+        gl.vertexAttribPointer(
+          shaderProgram.textureCoordAttribute,
+          jupiterBuffers.textureCoordBuffer.itemSize,
+          gl.FLOAT,
+          false,
+          0,
+          0
+        );
+
+        gl.activeTexture(gl.TEXTURE0);
+        gl.bindTexture(gl.TEXTURE_2D, jupiterBuffers.texture);
+        gl.uniform1i(shaderProgram.samplerUniform, 0);
+        setMatrixUniforms();
+        gl.drawArrays(gl.TRIANGLES, 0, jupiterBuffers.positionBuffer.numItems);
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
+        /*************************
+         * END DRAWING JUPITER
+         *************************/
+        /*************************
+         * START DRAWING SATURN
+         **************************/
+        mat4.identity(mvMatrix);
+        mat4.translate(mvMatrix, mvMatrix, [4.1, 0, -7.0]);
+        mat4.rotate(mvMatrix, mvMatrix, 90, [1, 0, 0]);
+        mat4.rotate(mvMatrix, mvMatrix, degToRad(xRot), [0, 0, 1]);
+
+        // positions
+        gl.bindBuffer(gl.ARRAY_BUFFER, saturnBuffers.positionBuffer);
+        gl.vertexAttribPointer(
+          shaderProgram.vertexPositionAttribute,
+          saturnBuffers.positionBuffer.itemSize,
+          gl.FLOAT,
+          false,
+          0,
+          0
+        );
+
+        // normals
+        gl.bindBuffer(gl.ARRAY_BUFFER, saturnBuffers.normBuffer);
+        gl.vertexAttribPointer(
+          shaderProgram.vertexNormalAttribute,
+          saturnBuffers.normBuffer.itemSize,
+          gl.FLOAT,
+          false,
+          0,
+          0
+        );
+
+        // texture coordinates
+        gl.bindBuffer(gl.ARRAY_BUFFER, saturnBuffers.textureCoordBuffer);
+        gl.vertexAttribPointer(
+          shaderProgram.textureCoordAttribute,
+          saturnBuffers.textureCoordBuffer.itemSize,
+          gl.FLOAT,
+          false,
+          0,
+          0
+        );
+
+        gl.activeTexture(gl.TEXTURE0);
+        gl.bindTexture(gl.TEXTURE_2D, saturnBuffers.texture);
+        gl.uniform1i(shaderProgram.samplerUniform, 0);
+        setMatrixUniforms();
+        gl.drawArrays(gl.TRIANGLES, 0, saturnBuffers.positionBuffer.numItems);
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
+        /*************************
+         * END DRAWING SATURN
+         *************************/
+        /*************************
+         * START DRAWING URANUS
+         *************************/
+        mat4.identity(mvMatrix);
+        mat4.translate(mvMatrix, mvMatrix, [4.8, 0, -7.0]);
+        mat4.rotate(mvMatrix, mvMatrix, 90, [1, 0, 0]);
+        mat4.rotate(mvMatrix, mvMatrix, degToRad(xRot), [0, 0, 1]);
+
+        // positions
+        gl.bindBuffer(gl.ARRAY_BUFFER, uranusBuffers.positionBuffer);
+        gl.vertexAttribPointer(
+          shaderProgram.vertexPositionAttribute,
+          uranusBuffers.positionBuffer.itemSize,
+          gl.FLOAT,
+          false,
+          0,
+          0
+        );
+
+        // normals
+        gl.bindBuffer(gl.ARRAY_BUFFER, uranusBuffers.normBuffer);
+        gl.vertexAttribPointer(
+          shaderProgram.vertexNormalAttribute,
+          uranusBuffers.normBuffer.itemSize,
+          gl.FLOAT,
+          false,
+          0,
+          0
+        );
+
+        // texture coordinates
+        gl.bindBuffer(gl.ARRAY_BUFFER, uranusBuffers.textureCoordBuffer);
+        gl.vertexAttribPointer(
+          shaderProgram.textureCoordAttribute,
+          uranusBuffers.textureCoordBuffer.itemSize,
+          gl.FLOAT,
+          false,
+          0,
+          0
+        );
+
+        gl.activeTexture(gl.TEXTURE0);
+        gl.bindTexture(gl.TEXTURE_2D, uranusBuffers.texture);
+        gl.uniform1i(shaderProgram.samplerUniform, 0);
+        setMatrixUniforms();
+        gl.drawArrays(gl.TRIANGLES, 0, uranusBuffers.positionBuffer.numItems);
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
+        /*************************
+         * END DRAWING URANUS
+         *************************/
+        /*************************
+         * START DRAWING NEPTUNE
+         *************************/
+        mat4.identity(mvMatrix);
+        mat4.translate(mvMatrix, mvMatrix, [5.4, 0, -7.0]);
+        mat4.rotate(mvMatrix, mvMatrix, 90, [1, 0, 0]);
+        mat4.rotate(mvMatrix, mvMatrix, degToRad(xRot), [0, 0, 1]);
+
+        // positions
+        gl.bindBuffer(gl.ARRAY_BUFFER, neptuneBuffers.positionBuffer);
+        gl.vertexAttribPointer(
+          shaderProgram.vertexPositionAttribute,
+          neptuneBuffers.positionBuffer.itemSize,
+          gl.FLOAT,
+          false,
+          0,
+          0
+        );
+
+        // normals
+        gl.bindBuffer(gl.ARRAY_BUFFER, neptuneBuffers.normBuffer);
+        gl.vertexAttribPointer(
+          shaderProgram.vertexNormalAttribute,
+          neptuneBuffers.normBuffer.itemSize,
+          gl.FLOAT,
+          false,
+          0,
+          0
+        );
+
+        // texture coordinates
+        gl.bindBuffer(gl.ARRAY_BUFFER, neptuneBuffers.textureCoordBuffer);
+        gl.vertexAttribPointer(
+          shaderProgram.textureCoordAttribute,
+          neptuneBuffers.textureCoordBuffer.itemSize,
+          gl.FLOAT,
+          false,
+          0,
+          0
+        );
+
+        gl.activeTexture(gl.TEXTURE0);
+        gl.bindTexture(gl.TEXTURE_2D, neptuneBuffers.texture);
+        gl.uniform1i(shaderProgram.samplerUniform, 0);
+        setMatrixUniforms();
+        gl.drawArrays(gl.TRIANGLES, 0, neptuneBuffers.positionBuffer.numItems);
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
       }
 
       var canvas;
