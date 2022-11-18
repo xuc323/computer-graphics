@@ -5,7 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>CSE 313 Project 5</title>
-    <!-- Fragment shader -->
+    <!-- Fragment shader for gouraud shading-->
     <script id="shader-fs" type="x-shader/x-fragment">
       // sets the precision of vColor
       precision mediump float;
@@ -25,8 +25,8 @@
         gl_FragColor = vec4(textureColor.rgb * vLightWeighting, textureColor.a);
       }
     </script>
-    <!-- Fragment shader -->
-    <!-- Vertex shader -->
+    <!-- Fragment shader for gouraud shading-->
+    <!-- Vertex shader for gouraud shading-->
     <script id="shader-vs" type="x-shader/x-vertex">
       // Attributes are inputs provided for each vertex,
       // different for each vertex in the rendering call input: vertex position
@@ -71,7 +71,74 @@
         }
       }
     </script>
-    <!-- Vertex shader -->
+    <!-- Vertex shader for gouraud shading-->
+    <!-- Fragment shader for phong shading-->
+    <script id="perfrag-shader-fs" type="x-shader/x-fragment">
+      // sets the precision of vColor
+      precision mediump float;
+
+      // input texture coordinate
+      // webGL figures out the interpolated coordinates along the texture
+      varying vec2 vTextureCoord;
+      varying vec3 vLightWeighting;
+
+      // a sampler is shader's representation of the texture
+      uniform sampler2D uSampler;
+
+      void main(void) {
+        // texture2D gets the appropriate pixel color from the texture
+        vec4 textureColor = texture2D(uSampler, vec2(vTextureCoord.s, vTextureCoord.t));
+        // here we incorporate the lighting equation
+        gl_FragColor = vec4(textureColor.rgb * vLightWeighting, textureColor.a);
+      }
+    </script>
+    <!-- Fragment shader for phong shading-->
+    <!-- Vertex shader for phong shading-->
+    <script id="perfrag-shader-vs" type="x-shader/x-vertex">
+      // Attributes are inputs provided for each vertex,
+      // different for each vertex in the rendering call input: vertex position
+      attribute vec3 aVertexPosition; // vertex coordinates
+
+      // vertex texture
+      attribute vec2 aTextureCoord; // texture coordinates
+      varying vec2 vTextureCoord; // output texture coordinates
+
+      // normals
+      attribute vec3 aVertexNormal; // vertex normals
+
+      // Uniforms are inputs provided for ALL vertices,
+      // the same for all vertices in any rendering call
+      uniform mat4 uMVMatrix; // model-view matrix
+      uniform mat4 uPMatrix; // perspective matrix
+      uniform mat3 uNMatrix; // normal matrix
+
+      // light
+      uniform vec3 uAmbientColor; // ambient light color
+      uniform vec3 uLightingDirection; // light direction
+      uniform vec3 uDirectionalColor; // directional light color
+      uniform bool uUseLighting; // use lighting on or off
+      varying vec3 vLightWeighting; // output light weight
+
+      // pass through the texture coordinates from aTextureCoord to vTextureCoord
+      // the varying variable is the output
+      void main(void) {
+        gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
+
+        // pass vertex color to fragment shader
+        vTextureCoord = aTextureCoord;
+
+        if (!uUseLighting) {
+          // light is white by default
+          vLightWeighting = vec3(1.0, 1.0, 1.0);
+        } else {
+          // calculate the light weighting
+          vec3 transformedNormal = uNMatrix * aVertexNormal;
+          float directionalLightWeighting = max(dot(transformedNormal, uLightingDirection), 0.0);
+          vLightWeighting = uAmbientColor + uDirectionalColor * directionalLightWeighting;
+        }
+      }
+    </script>
+    <!-- Vertex shader for phong shading-->
     <script type="text/javascript" src="../lib/gl-matrix-2.7.0.min.js"></script>
     <script type="text/javascript" src="../lib/webgl-utils.js"></script>
     <script type="text/javascript">

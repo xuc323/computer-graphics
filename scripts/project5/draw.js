@@ -22,17 +22,27 @@ function drawScene() {
         100.0
     );
 
+    // identify which shader program to use
+    let perFragmentLighting = document.getElementById("shaderCheck").checked;
+    if (perFragmentLighting) {
+        currentProgram = perFragmentProgram;
+    } else {
+        currentProgram = perVertexProgram;
+    }
+    // attach shader program to the openGl context
+    gl.useProgram(currentProgram);
+
     // set ambient light
-    gl.uniform1i(shaderProgram.useLightingUniform, true);
-    gl.uniform3fv(shaderProgram.ambientColorUniform, ambientLightColor);
+    gl.uniform1i(currentProgram.useLightingUniform, true);
+    gl.uniform3fv(currentProgram.ambientColorUniform, ambientLightColor);
 
     // set directional light
     vec3.normalize(directionalMatrix, directionalLightDirection);
     gl.uniform3fv(
-        shaderProgram.lightingDirectionUniform,
+        currentProgram.lightingDirectionUniform,
         directionalMatrix
     );
-    gl.uniform3fv(shaderProgram.directionalColorUniform, directionalLightColor);
+    gl.uniform3fv(currentProgram.directionalColorUniform, directionalLightColor);
 
     /*************************
      * START DRAWING SPHERE
@@ -47,7 +57,7 @@ function drawScene() {
     // positions
     gl.bindBuffer(gl.ARRAY_BUFFER, sphereBuffer.positionBuffer);
     gl.vertexAttribPointer(
-        shaderProgram.vertexPositionAttribute,
+        currentProgram.vertexPositionAttribute,
         sphereBuffer.positionBuffer.itemSize,
         gl.FLOAT,
         false,
@@ -56,10 +66,10 @@ function drawScene() {
     );
 
     // normals
-    gl.bindBuffer(gl.ARRAY_BUFFER, sphereBuffer.normBuffer);
+    gl.bindBuffer(gl.ARRAY_BUFFER, perFragmentLighting ? sphereBuffer.normPerFragBuffer : sphereBuffer.normPerVertexBuffer);
     gl.vertexAttribPointer(
-        shaderProgram.vertexNormalAttribute,
-        sphereBuffer.normBuffer.itemSize,
+        currentProgram.vertexNormalAttribute,
+        perFragmentLighting ? sphereBuffer.normPerFragBuffer.itemSize : sphereBuffer.normPerVertexBuffer.itemSize,
         gl.FLOAT,
         false,
         0,
@@ -69,7 +79,7 @@ function drawScene() {
     // texture coordinates
     gl.bindBuffer(gl.ARRAY_BUFFER, sphereBuffer.textureCoordBuffer);
     gl.vertexAttribPointer(
-        shaderProgram.textureCoordAttribute,
+        currentProgram.textureCoordAttribute,
         sphereBuffer.textureCoordBuffer.itemSize,
         gl.FLOAT,
         false,
@@ -79,7 +89,7 @@ function drawScene() {
 
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, sphereBuffer.texture);
-    gl.uniform1i(shaderProgram.samplerUniform, 0);
+    gl.uniform1i(currentProgram.samplerUniform, 0);
     // set uniform variable in vertex shader
     setMatrixUniforms();
     // draw the triangles
