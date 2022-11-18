@@ -160,25 +160,74 @@
       ///// Initialize buffers and textures /////
       ///////////////////////////////////////////
 
-      // Geometry buffer
-      var spherePositionBuffer;
-      // Texture buffer
-      var sphereTextureBuffer;
+      var sunBuffers = {
+        // vertex position buffer
+        positionBuffer: null,
+        // vertex texture coordinate buffer
+        textureCoordBuffer: null,
+        // vertex normal buffer
+        normBuffer: null,
+        // texture buffer
+        texture: null,
+      };
 
       // We will generate the geometry with this function
       function initBuffers() {
         /*************************
-         * START SPHERE BUFFER
+         * START SUN BUFFER
          *************************/
         // positions
-        spherePositionBuffer = gl.createBuffer();
-        gl.bindBuffer(gl.ARRAY_BUFFER, spherePositionBuffer);
+        sunBuffers.positionBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, sunBuffers.positionBuffer);
         let radius = 2.0,
           slices = 25,
-          stacks = 12,
-          count = 0;
-        let vertices = [],
-          normals = [];
+          stacks = 12;
+        let { vertices, normals, textureCoords } = createSphere(
+          radius,
+          slices,
+          stacks
+        );
+
+        gl.bufferData(
+          gl.ARRAY_BUFFER,
+          new Float32Array(vertices),
+          gl.STATIC_DRAW
+        );
+        // item size is always 3 (3d vector describing position)
+        sunBuffers.positionBuffer.itemSize = 3;
+        // numItems is the number of vertices in the triangle (2 * (slices + 1) * stacks)
+        sunBuffers.positionBuffer.numItems = 6 * (slices + 1) * stacks;
+
+        // texture coordinates
+        sunBuffers.textureCoordBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, sunBuffers.textureCoordBuffer);
+        gl.bufferData(
+          gl.ARRAY_BUFFER,
+          new Float32Array(textureCoords),
+          gl.STATIC_DRAW
+        );
+        sunBuffers.textureCoordBuffer.itemSize = 2;
+        sunBuffers.textureCoordBuffer.numItems = 6 * (slices + 1) * stacks;
+        gl.bindBuffer(gl.ARRAY_BUFFER, null);
+        /*************************
+         * END SUN BUFFER
+         *************************/
+
+        /*************************
+         * START EARTH BUFFER
+         *************************/
+
+        /*************************
+         * END EARTH BUFFER
+         *************************/
+      }
+
+      // helper function to create a sphere
+      function createSphere(radius, slices, stacks) {
+        let vertices = [], // vertex positions
+          normals = [], // vertex normals
+          textureCoords = []; // texture coordinates
+
         for (let t = 0; t < stacks; t++) {
           const phi1 = (t / stacks) * Math.PI;
           const phi2 = ((t + 1) / stacks) * Math.PI;
@@ -186,54 +235,40 @@
             const theta1 = (p / slices) * 2 * Math.PI;
             const theta2 = ((p + 1) / slices) * 2 * Math.PI;
 
+            // first triangle
             let xVal = radius * Math.cos(theta1) * Math.sin(phi1);
             let yVal = radius * Math.sin(theta1) * Math.sin(phi1);
             let zVal = radius * Math.cos(phi1);
             vertices = vertices.concat([xVal, yVal, zVal]);
-            count++;
 
             xVal = radius * Math.cos(theta1) * Math.sin(phi2);
             yVal = radius * Math.sin(theta1) * Math.sin(phi2);
             zVal = radius * Math.cos(phi2);
             vertices = vertices.concat([xVal, yVal, zVal]);
-            count++;
 
             xVal = radius * Math.cos(theta2) * Math.sin(phi1);
             yVal = radius * Math.sin(theta2) * Math.sin(phi1);
             zVal = radius * Math.cos(phi1);
             vertices = vertices.concat([xVal, yVal, zVal]);
-            count++;
 
+            // second triangle
             xVal = radius * Math.cos(theta2) * Math.sin(phi1);
             yVal = radius * Math.sin(theta2) * Math.sin(phi1);
             zVal = radius * Math.cos(phi1);
             vertices = vertices.concat([xVal, yVal, zVal]);
-            count++;
 
             xVal = radius * Math.cos(theta1) * Math.sin(phi2);
             yVal = radius * Math.sin(theta1) * Math.sin(phi2);
             zVal = radius * Math.cos(phi2);
             vertices = vertices.concat([xVal, yVal, zVal]);
-            count++;
 
             xVal = radius * Math.cos(theta2) * Math.sin(phi2);
             yVal = radius * Math.sin(theta2) * Math.sin(phi2);
             zVal = radius * Math.cos(phi2);
             vertices = vertices.concat([xVal, yVal, zVal]);
-            count++;
           }
         }
-        gl.bufferData(
-          gl.ARRAY_BUFFER,
-          new Float32Array(vertices),
-          gl.STATIC_DRAW
-        );
-        // item size is always 3 (3d vector describing position)
-        spherePositionBuffer.itemSize = 3;
-        // numItems is the number of vertices in the triangle (2 * (slices + 1) * stacks)
-        spherePositionBuffer.numItems = 6 * (slices + 1) * stacks;
 
-        let textureCoords = [];
         for (t = 0; t < stacks; t++) {
           const phi1 = t / stacks;
           const phi2 = (t + 1) / stacks;
@@ -241,41 +276,31 @@
             const theta1 = 1 - p / slices;
             const theta2 = 1 - (p + 1) / slices;
 
+            // first triangle
             textureCoords = textureCoords.concat([theta1, phi1]);
             textureCoords = textureCoords.concat([theta1, phi2]);
             textureCoords = textureCoords.concat([theta2, phi1]);
+            // second triangle
             textureCoords = textureCoords.concat([theta2, phi1]);
             textureCoords = textureCoords.concat([theta1, phi2]);
             textureCoords = textureCoords.concat([theta2, phi2]);
           }
         }
 
-        sphereTextureBuffer = gl.createBuffer();
-        gl.bindBuffer(gl.ARRAY_BUFFER, sphereTextureBuffer);
-        gl.bufferData(
-          gl.ARRAY_BUFFER,
-          new Float32Array(textureCoords),
-          gl.STATIC_DRAW
-        );
-        sphereTextureBuffer.itemSize = 2;
-        sphereTextureBuffer.numItems = 6 * (slices + 1) * stacks;
-        gl.bindBuffer(gl.ARRAY_BUFFER, null);
-        /*************************
-         * END SPHERE BUFFER
-         *************************/
+        return { vertices, normals, textureCoords };
       }
 
       // generate texture
-      var worldTexture;
       function initTexture() {
-        worldTexture = gl.createTexture();
-        worldTexture.image = new Image();
-
-        worldTexture.image.onload = function () {
-          handleLoadedTexture(worldTexture);
+        // sun texture
+        sunBuffers.texture = gl.createTexture();
+        sunBuffers.texture.image = new Image();
+        sunBuffers.texture.image.onload = function () {
+          handleLoadedTexture(sunBuffers.texture);
         };
+        sunBuffers.texture.image.src = "../assets/sun.gif";
 
-        worldTexture.image.src = "../assets/sun.gif";
+        // earth texture
       }
 
       // reads the texture image and saves it to the variable provided
@@ -322,7 +347,7 @@
         );
 
         /*************************
-         * START DRAWING SPHERE
+         * START DRAWING SUN
          *************************/
         // reset the model view matrix
         mat4.identity(mvMatrix);
@@ -331,10 +356,10 @@
         mat4.rotate(mvMatrix, mvMatrix, degToRad(xRot), [0, 1, 0]);
 
         // positions
-        gl.bindBuffer(gl.ARRAY_BUFFER, spherePositionBuffer);
+        gl.bindBuffer(gl.ARRAY_BUFFER, sunBuffers.positionBuffer);
         gl.vertexAttribPointer(
           shaderProgram.vertexPositionAttribute,
-          spherePositionBuffer.itemSize,
+          sunBuffers.positionBuffer.itemSize,
           gl.FLOAT,
           false,
           0,
@@ -342,10 +367,10 @@
         );
 
         // texture coordinates
-        gl.bindBuffer(gl.ARRAY_BUFFER, sphereTextureBuffer);
+        gl.bindBuffer(gl.ARRAY_BUFFER, sunBuffers.textureCoordBuffer);
         gl.vertexAttribPointer(
           shaderProgram.textureCoordAttribute,
-          sphereTextureBuffer.itemSize,
+          sunBuffers.textureCoordBuffer.itemSize,
           gl.FLOAT,
           false,
           0,
@@ -353,16 +378,16 @@
         );
 
         gl.activeTexture(gl.TEXTURE0);
-        gl.bindTexture(gl.TEXTURE_2D, worldTexture);
+        gl.bindTexture(gl.TEXTURE_2D, sunBuffers.texture);
         gl.uniform1i(shaderProgram.samplerUniform, 0);
 
         // set uniform variable in vertex shader
         setMatrixUniforms();
-        // draw the line
-        gl.drawArrays(gl.TRIANGLES, 0, spherePositionBuffer.numItems);
+        // draw the triangles
+        gl.drawArrays(gl.TRIANGLES, 0, sunBuffers.positionBuffer.numItems);
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
         /*************************
-         * END DRAWING SPHERE
+         * END DRAWING SUN
          *************************/
       }
 
