@@ -124,8 +124,119 @@
   </head>
   <body onload="webGLStart();">
     <canvas id="webGLcanvas" style="border: none"> </canvas>
+    <div class="inputs">
+      <div style="margin-top: 5px; margin-bottom: 5px">
+        <div style="font-weight: bold; margin-bottom: 5px">
+          Ambient light color
+        </div>
+        <label for="ambientColorR">R</label>
+        <input
+          type="number"
+          name="R"
+          id="ambientColorR"
+          value="0.5"
+          step="0.01"
+          max="1.0"
+          min="0.0"
+        />
+        <label for="ambientColorG">G</label>
+        <input
+          type="number"
+          name="G"
+          id="ambientColorG"
+          value="0.0"
+          step="0.01"
+          max="1.0"
+          min="0.0"
+        />
+        <label for="ambientColorB">B</label>
+        <input
+          type="number"
+          name="B"
+          id="ambientColorB"
+          value="0.0"
+          step="0.01"
+          max="1.0"
+          min="0.0"
+        />
+      </div>
+      <div style="margin-top: 5px; margin-bottom: 5px">
+        <div style="font-weight: bold; margin-bottom: 5px">
+          Directional light color
+        </div>
+        <label for="directionalColorR">R</label>
+        <input
+          type="number"
+          name="R"
+          id="directionalColorR"
+          value="1.0"
+          step="0.01"
+          max="1.0"
+          min="0.0"
+        />
+        <label for="directionalColorG">G</label>
+        <input
+          type="number"
+          name="G"
+          id="directionalColorG"
+          value="1.0"
+          step="0.01"
+          max="1.0"
+          min="0.0"
+        />
+        <label for="directionalColorB">B</label>
+        <input
+          type="number"
+          name="B"
+          id="directionalColorB"
+          value="1.0"
+          step="0.01"
+          max="1.0"
+          min="0.0"
+        />
+      </div>
+      <div style="margin-top: 5px; margin-bottom: 5px">
+        <div style="font-weight: bold; margin-bottom: 5px">
+          Directional light direction
+        </div>
+        <label for="directionalDirectionX">X</label>
+        <input
+          type="number"
+          name="X"
+          id="directionalDirectionX"
+          value="1.0"
+          step="0.01"
+        />
+        <label for="directionalDirectionY">Y</label>
+        <input
+          type="number"
+          name="Y"
+          id="directionalDirectionY"
+          value="1.0"
+          step="0.01"
+        />
+        <label for="directionalDirectionZ">Z</label>
+        <input
+          type="number"
+          name="Z"
+          id="directionalDirectionZ"
+          value="0.0"
+          step="0.01"
+        />
+      </div>
+      <div style="margin-top: 5px; margin-bottom: 5px; font-weight: bold">
+        <label for="shaderCheck">Gouraud / Phong Shading</label>
+        <input type="checkbox" name="gpShading" id="shaderCheck" />
+      </div>
+      <div style="margin-top: 5px; font-weight: bold">
+        <label for="specularityCheck">Specularity on/off</label>
+        <input type="checkbox" name="specularity" id="specularityCheck" />
+      </div>
+    </div>
     <footer>
-      Lehigh University &bullet; CSE 313 Computer Graphics &bullet; Fall 2022
+      <p style="text-align: right; margin: 0">
+        Lehigh University &bullet; CSE 313 Computer Graphics &bullet; Fall 2022
+      </p>
     </footer>
   </body>
 </html>

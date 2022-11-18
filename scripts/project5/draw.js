@@ -3,6 +3,12 @@ var mvMatrix = mat4.create();
 var pMatrix = mat4.create();
 var normalMatrix = mat3.create();
 var directionalMatrix = vec3.create();
+
+// lighting variables
+var ambientLightColor = [0.5, 0.0, 0.0];
+var directionalLightColor = [1.0, 1.0, 1.0];
+var directionalLightDirection = [1.0, 1.0, 0.0];
+
 function drawScene() {
     gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
@@ -18,15 +24,15 @@ function drawScene() {
 
     // set ambient light
     gl.uniform1i(shaderProgram.useLightingUniform, true);
-    gl.uniform3f(shaderProgram.ambientColorUniform, 0.0, 0.0, 0.0);
+    gl.uniform3fv(shaderProgram.ambientColorUniform, ambientLightColor);
 
     // set directional light
-    vec3.normalize(directionalMatrix, [1, 0, 0.8]);
+    vec3.normalize(directionalMatrix, directionalLightDirection);
     gl.uniform3fv(
         shaderProgram.lightingDirectionUniform,
         directionalMatrix
     );
-    gl.uniform3f(shaderProgram.directionalColorUniform, 1.0, 1.0, 1.0);
+    gl.uniform3fv(shaderProgram.directionalColorUniform, directionalLightColor);
 
     /*************************
      * START DRAWING SPHERE
@@ -88,5 +94,10 @@ function drawScene() {
 function tick() {
     requestAnimFrame(tick); // infinite recursive call
     resize(canvas); // resize the canvas to the window size
+
+    ambientLightColor = getHTMLObject("ambientColorR", "ambientColorG", "ambientColorB");
+    directionalLightColor = getHTMLObject("directionalColorR", "directionalColorG", "directionalColorB");
+    directionalLightDirection = getHTMLObject("directionalDirectionX", "directionalDirectionY", "directionalDirectionZ");
+
     drawScene(); // draw the scene
 }

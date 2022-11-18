@@ -298,3 +298,10 @@ function handleMouseMove(event) {
     lastMouseX = newX;
     lastMouseY = newY;
 }
+
+function getHTMLObject(id1, id2, id3) {
+    const val1 = document.getElementById(id1).value;
+    const val2 = document.getElementById(id2).value;
+    const val3 = document.getElementById(id3).value;
+    return [val1, val2, val3];
+}
