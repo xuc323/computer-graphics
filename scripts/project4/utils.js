@@ -207,19 +207,21 @@ function handleMouseMove(event) {
     var newX = event.clientX;
     var newY = event.clientY;
 
-    var deltaX = newX - lastMouseX;
     var newRotationMatrix = mat4.create();
     mat4.identity(newRotationMatrix);
-    mat4.rotate(newRotationMatrix, newRotationMatrix, degToRad(deltaX / 10), [1, 0, 0]);
+
+    var deltaX = newX - lastMouseX;
+    mat4.rotate(newRotationMatrix, newRotationMatrix, degToRad(deltaX / 10), [0, 1, 0]);
 
     var deltaY = newY - lastMouseY;
-    mat4.rotate(newRotationMatrix, newRotationMatrix, degToRad(deltaY / 10), [0, 1, 0]);
+    mat4.rotate(newRotationMatrix, newRotationMatrix, degToRad(deltaY / 10), [1, 0, 0]);
 
     mat4.multiply(mouseRotMatrix, newRotationMatrix, mouseRotMatrix);
     lastMouseX = newX;
     lastMouseY = newY;
 }
 
+// NOTE: not yet used
 function orLineVertices(radius, sceneDepth) {
     var values = {
         vertices: [],
