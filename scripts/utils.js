@@ -220,25 +220,3 @@ function handleMouseMove(event) {
     lastMouseX = newX;
     lastMouseY = newY;
 }
-
-// NOTE: not yet used
-function orLineVertices(radius, sceneDepth) {
-    var values = {
-        vertices: [],
-        textureCoords: [],
-        numItems: 0
-    };
-
-    for (var i = 0; i < Math.PI * 2; i += 0.05) {
-        var x = Math.cos(i) * radius;
-        var y = Math.sin(i) * radius;
-        // var z = Math.sin(i) * radius + sceneDepth;
-        var z = 0;
-
-        values.vertices = values.vertices.concat([x, y, z]);
-        values.textureCoords = values.textureCoords.concat([0, 0]);
-        values.numItems++;
-    }
-
-    return values;
-}
