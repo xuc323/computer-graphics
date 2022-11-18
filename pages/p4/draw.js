@@ -34,13 +34,14 @@ function drawScene() {
     // reset the model view matrix
     mat4.identity(mvMatrix);
     // set the position of the sphere
-    mat4.translate(mvMatrix, mvMatrix, [0, 0, -7.0]);
+    mat4.translate(mvMatrix, mvMatrix, [0, 0, -10.0]);
+    mat4.multiply(mvMatrix, mvMatrix, mouseRotMatrix);
     mat4.rotate(mvMatrix, mvMatrix, 90, [1, 0, 0]);
     mat4.rotate(
         mvMatrix,
         mvMatrix,
         degToRad(sunBuffers.rotation),
-        [0, 0, 1]
+        [0, 1, 1]
     );
 
 
@@ -92,7 +93,8 @@ function drawScene() {
      * START DRAWING MERCURY
      *************************/
     mat4.identity(mvMatrix);
-    mat4.translate(mvMatrix, mvMatrix, [0, 0, -7.0]);
+    mat4.translate(mvMatrix, mvMatrix, [0, 0, -10.0]);
+    mat4.multiply(mvMatrix, mvMatrix, mouseRotMatrix);
     mat4.translate(mvMatrix, mvMatrix, [
         mercuryBuffers.orbitRadius * Math.cos(degToRad(mercuryBuffers.orbit)),
         0,
@@ -103,7 +105,7 @@ function drawScene() {
         mvMatrix,
         mvMatrix,
         degToRad(mercuryBuffers.rotation),
-        [0, 0, 1]
+        [1, 0, 1]
     );
 
     // positions
@@ -152,7 +154,8 @@ function drawScene() {
      * START DRAWING VENUS
      *************************/
     mat4.identity(mvMatrix);
-    mat4.translate(mvMatrix, mvMatrix, [0, 0, -7.0]);
+    mat4.translate(mvMatrix, mvMatrix, [0, 0, -10.0]);
+    mat4.multiply(mvMatrix, mvMatrix, mouseRotMatrix);
     mat4.translate(mvMatrix, mvMatrix, [
         0,
         venusBuffers.orbitRadius * Math.cos(degToRad(venusBuffers.orbit)),
@@ -212,7 +215,8 @@ function drawScene() {
      * START DRAWING EARTH
      *************************/
     mat4.identity(mvMatrix);
-    mat4.translate(mvMatrix, mvMatrix, [0, 0, -7.0]);
+    mat4.translate(mvMatrix, mvMatrix, [0, 0, -10.0]);
+    mat4.multiply(mvMatrix, mvMatrix, mouseRotMatrix);
     mat4.translate(mvMatrix, mvMatrix, [
         earthBuffers.orbitRadius * Math.sin(degToRad(earthBuffers.orbit)),
         0,
@@ -269,10 +273,77 @@ function drawScene() {
      * END DRAWING EARTH
      *************************/
     /*************************
+     * START DRAWING MOON
+     *************************/
+    mat4.identity(mvMatrix);
+    mat4.translate(mvMatrix, mvMatrix, [0, 0, -10.0]);
+    mat4.multiply(mvMatrix, mvMatrix, mouseRotMatrix);
+    mat4.translate(mvMatrix, mvMatrix, [
+        earthBuffers.orbitRadius * Math.sin(degToRad(earthBuffers.orbit)),
+        0,
+        earthBuffers.orbitRadius * Math.cos(degToRad(earthBuffers.orbit))
+    ]);
+    mat4.translate(mvMatrix, mvMatrix, [
+        0,
+        moonBuffers.orbitRadius * Math.cos(degToRad(moonBuffers.orbit)),
+        moonBuffers.orbitRadius * Math.sin(degToRad(moonBuffers.orbit))
+    ]);
+    mat4.rotate(mvMatrix, mvMatrix, 90, [1, 0, 0]);
+    mat4.rotate(
+        mvMatrix,
+        mvMatrix,
+        degToRad(moonBuffers.rotation),
+        [0, 1, 1]
+    );
+
+    // positions
+    gl.bindBuffer(gl.ARRAY_BUFFER, moonBuffers.positionBuffer);
+    gl.vertexAttribPointer(
+        shaderProgram.vertexPositionAttribute,
+        moonBuffers.positionBuffer.itemSize,
+        gl.FLOAT,
+        false,
+        0,
+        0
+    );
+
+    // normals
+    gl.bindBuffer(gl.ARRAY_BUFFER, moonBuffers.normBuffer);
+    gl.vertexAttribPointer(
+        shaderProgram.vertexNormalAttribute,
+        moonBuffers.normBuffer.itemSize,
+        gl.FLOAT,
+        false,
+        0,
+        0
+    );
+
+    // texture coordinates
+    gl.bindBuffer(gl.ARRAY_BUFFER, moonBuffers.textureCoordBuffer);
+    gl.vertexAttribPointer(
+        shaderProgram.textureCoordAttribute,
+        moonBuffers.textureCoordBuffer.itemSize,
+        gl.FLOAT,
+        false,
+        0,
+        0
+    );
+
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, moonBuffers.texture);
+    gl.uniform1i(shaderProgram.samplerUniform, 0);
+    setMatrixUniforms();
+    gl.drawArrays(gl.TRIANGLES, 0, moonBuffers.positionBuffer.numItems);
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
+    /*************************
+     * END DRAWING MOON
+     *************************/
+    /*************************
      * START DRAWING MARS
      *************************/
     mat4.identity(mvMatrix);
-    mat4.translate(mvMatrix, mvMatrix, [0, 0, -7.0]);
+    mat4.translate(mvMatrix, mvMatrix, [0, 0, -10.0]);
+    mat4.multiply(mvMatrix, mvMatrix, mouseRotMatrix);
     mat4.translate(mvMatrix, mvMatrix, [
         0,
         marsBuffers.orbitRadius * Math.sin(degToRad(marsBuffers.orbit)),
@@ -332,7 +403,8 @@ function drawScene() {
      * START DRAWING JUPITER
      *************************/
     mat4.identity(mvMatrix);
-    mat4.translate(mvMatrix, mvMatrix, [0, 0, -7.0]);
+    mat4.translate(mvMatrix, mvMatrix, [0, 0, -10.0]);
+    mat4.multiply(mvMatrix, mvMatrix, mouseRotMatrix);
     mat4.translate(mvMatrix, mvMatrix, [
         jupiterBuffers.orbitRadius * Math.cos(degToRad(jupiterBuffers.orbit)),
         jupiterBuffers.orbitRadius * Math.sin(degToRad(jupiterBuffers.orbit)),
@@ -392,7 +464,8 @@ function drawScene() {
      * START DRAWING SATURN
      **************************/
     mat4.identity(mvMatrix);
-    mat4.translate(mvMatrix, mvMatrix, [0, 0, -7.0]);
+    mat4.translate(mvMatrix, mvMatrix, [0, 0, -10.0]);
+    mat4.multiply(mvMatrix, mvMatrix, mouseRotMatrix);
     mat4.translate(mvMatrix, mvMatrix, [
         saturnBuffers.orbitRadius * Math.cos(degToRad(saturnBuffers.orbit)),
         0,
@@ -452,7 +525,8 @@ function drawScene() {
      * START DRAWING URANUS
      *************************/
     mat4.identity(mvMatrix);
-    mat4.translate(mvMatrix, mvMatrix, [0, 0, -7.0]);
+    mat4.translate(mvMatrix, mvMatrix, [0, 0, -10.0]);
+    mat4.multiply(mvMatrix, mvMatrix, mouseRotMatrix);
     mat4.translate(mvMatrix, mvMatrix, [
         0,
         uranusBuffers.orbitRadius * Math.sin(degToRad(uranusBuffers.orbit)),
@@ -512,7 +586,8 @@ function drawScene() {
      * START DRAWING NEPTUNE
      *************************/
     mat4.identity(mvMatrix);
-    mat4.translate(mvMatrix, mvMatrix, [0, 0, -7.0]);
+    mat4.translate(mvMatrix, mvMatrix, [0, 0, -10.0]);
+    mat4.multiply(mvMatrix, mvMatrix, mouseRotMatrix);
     mat4.translate(mvMatrix, mvMatrix, [
         neptuneBuffers.orbitRadius * Math.sin(degToRad(neptuneBuffers.orbit)),
         0,
@@ -577,6 +652,7 @@ function animate() {
         calculateRotation(elapsed, mercuryBuffers);
         calculateRotation(elapsed, venusBuffers);
         calculateRotation(elapsed, earthBuffers);
+        calculateRotation(elapsed, moonBuffers);
         calculateRotation(elapsed, marsBuffers);
         calculateRotation(elapsed, jupiterBuffers);
         calculateRotation(elapsed, saturnBuffers);
@@ -586,6 +662,7 @@ function animate() {
         calculateOrbit(elapsed, mercuryBuffers);
         calculateOrbit(elapsed, venusBuffers);
         calculateOrbit(elapsed, earthBuffers);
+        calculateOrbit(elapsed, moonBuffers);
         calculateOrbit(elapsed, marsBuffers);
         calculateOrbit(elapsed, jupiterBuffers);
         calculateOrbit(elapsed, saturnBuffers);

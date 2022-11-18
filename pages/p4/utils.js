@@ -182,3 +182,61 @@ function setMatrixUniforms() {
     mat3.transpose(normalMatrix, normalMatrix);
     gl.uniformMatrix3fv(shaderProgram.nMatrixUniform, false, normalMatrix);
 }
+
+var mouseDown = false;
+var lastMouseX = null;
+var lastMouseY = null;
+
+var mouseRotMatrix = mat4.create();
+mat4.identity(mouseRotMatrix);
+
+function handleMouseDown(event) {
+    mouseDown = true;
+    lastMouseX = event.clientX;
+    lastMouseY = event.clientY;
+}
+
+function handleMouseUp(event) {
+    mouseDown = false;
+}
+
+function handleMouseMove(event) {
+    if (!mouseDown) {
+        return;
+    }
+    var newX = event.clientX;
+    var newY = event.clientY;
+
+    var deltaX = newX - lastMouseX;
+    var newRotationMatrix = mat4.create();
+    mat4.identity(newRotationMatrix);
+    mat4.rotate(newRotationMatrix, newRotationMatrix, degToRad(deltaX / 10), [1, 0, 0]);
+
+    var deltaY = newY - lastMouseY;
+    mat4.rotate(newRotationMatrix, newRotationMatrix, degToRad(deltaY / 10), [0, 1, 0]);
+
+    mat4.multiply(mouseRotMatrix, newRotationMatrix, mouseRotMatrix);
+    lastMouseX = newX;
+    lastMouseY = newY;
+}
+
+function orLineVertices(radius, sceneDepth) {
+    var values = {
+        vertices: [],
+        textureCoords: [],
+        numItems: 0
+    };
+
+    for (var i = 0; i < Math.PI * 2; i += 0.05) {
+        var x = Math.cos(i) * radius;
+        var y = Math.sin(i) * radius;
+        // var z = Math.sin(i) * radius + sceneDepth;
+        var z = 0;
+
+        values.vertices = values.vertices.concat([x, y, z]);
+        values.textureCoords = values.textureCoords.concat([0, 0]);
+        values.numItems++;
+    }
+
+    return values;
+}

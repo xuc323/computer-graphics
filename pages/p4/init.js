@@ -42,6 +42,17 @@ var earthBuffers = {
     orbit: 0, // orbit angle
     orbitRadius: 1.8, // orbit radius
 };
+var moonBuffers = {
+    positionBuffer: null, // vertex position buffer
+    textureCoordBuffer: null, // vertex texture coordinate buffer
+    normBuffer: null, // vertex normal buffer
+    texture: null, // texture buffer
+    rotationSpeed: 10, // rotation speed
+    rotation: 0, // rotation angle
+    orbitSpeed: 50, // orbit speed
+    orbit: 0, // orbit angle
+    orbitRadius: 0.3, // orbit radius
+};
 var marsBuffers = {
     positionBuffer: null, // vertex position buffer
     textureCoordBuffer: null, // vertex texture coordinate buffer
@@ -292,6 +303,53 @@ function initBuffers() {
     /*************************
      * END EARTH BUFFER
      *************************/
+    /*************************
+     * START MOON BUFFER
+     *************************/
+    radius = 0.05;
+    slices = 25;
+    stacks = 12;
+    ({ vertices, normals, textureCoords } = createSphere(
+        radius,
+        slices,
+        stacks
+    ));
+    // positions
+    moonBuffers.positionBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, moonBuffers.positionBuffer);
+    gl.bufferData(
+        gl.ARRAY_BUFFER,
+        new Float32Array(vertices),
+        gl.STATIC_DRAW
+    );
+    moonBuffers.positionBuffer.itemSize = 3;
+    moonBuffers.positionBuffer.numItems = 6 * (slices + 1) * stacks;
+
+    // texture coordinates
+    moonBuffers.textureCoordBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, moonBuffers.textureCoordBuffer);
+    gl.bufferData(
+        gl.ARRAY_BUFFER,
+        new Float32Array(textureCoords),
+        gl.STATIC_DRAW
+    );
+    moonBuffers.textureCoordBuffer.itemSize = 2;
+    moonBuffers.textureCoordBuffer.numItems = 6 * (slices + 1) * stacks;
+
+    // normals
+    moonBuffers.normBuffer = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, moonBuffers.normBuffer);
+    gl.bufferData(
+        gl.ARRAY_BUFFER,
+        new Float32Array(normals),
+        gl.STATIC_DRAW
+    );
+    moonBuffers.normBuffer.itemSize = 3;
+    moonBuffers.normBuffer.numItems = 6 * (slices + 1) * stacks;
+    gl.bindBuffer(gl.ARRAY_BUFFER, null);
+    /*************************
+     * END MOON BUFFER
+     ************************/
     /*************************
      * START MARS BUFFER
      ************************/
@@ -563,6 +621,14 @@ function initTexture() {
         handleLoadedTexture(earthBuffers.texture);
     };
     earthBuffers.texture.image.src = "../assets/earth.gif";
+
+    // moon texture
+    moonBuffers.texture = gl.createTexture();
+    moonBuffers.texture.image = new Image();
+    moonBuffers.texture.image.onload = function () {
+        handleLoadedTexture(moonBuffers.texture);
+    };
+    moonBuffers.texture.image.src = "../assets/moon.gif";
 
     // mars texture
     marsBuffers.texture = gl.createTexture();

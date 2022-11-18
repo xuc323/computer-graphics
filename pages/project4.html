@@ -94,6 +94,11 @@
         // Set the background color to opaque black
         gl.clearColor(0.0, 0.0, 0.0, 1.0);
 
+        // handle mouse inputs with callbacks
+        canvas.onmousedown = handleMouseDown;
+        document.onmouseup = handleMouseUp;
+        document.onmousemove = handleMouseMove;
+
         // Render only pixels in front of the others
         gl.enable(gl.DEPTH_TEST);
 
