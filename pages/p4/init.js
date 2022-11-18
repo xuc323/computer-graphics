@@ -538,7 +538,7 @@ function initTexture() {
     sunBuffers.texture.image.onload = function () {
         handleLoadedTexture(sunBuffers.texture);
     };
-    sunBuffers.texture.image.src = "../../assets/sun.gif";
+    sunBuffers.texture.image.src = "../assets/sun.gif";
 
     // mercury texture
     mercuryBuffers.texture = gl.createTexture();
@@ -546,7 +546,7 @@ function initTexture() {
     mercuryBuffers.texture.image.onload = function () {
         handleLoadedTexture(mercuryBuffers.texture);
     };
-    mercuryBuffers.texture.image.src = "../../assets/mercury.gif";
+    mercuryBuffers.texture.image.src = "../assets/mercury.gif";
 
     // venus texture
     venusBuffers.texture = gl.createTexture();
@@ -554,7 +554,7 @@ function initTexture() {
     venusBuffers.texture.image.onload = function () {
         handleLoadedTexture(venusBuffers.texture);
     };
-    venusBuffers.texture.image.src = "../../assets/venus.gif";
+    venusBuffers.texture.image.src = "../assets/venus.gif";
 
     // earth texture
     earthBuffers.texture = gl.createTexture();
@@ -562,7 +562,7 @@ function initTexture() {
     earthBuffers.texture.image.onload = function () {
         handleLoadedTexture(earthBuffers.texture);
     };
-    earthBuffers.texture.image.src = "../../assets/earth.gif";
+    earthBuffers.texture.image.src = "../assets/earth.gif";
 
     // mars texture
     marsBuffers.texture = gl.createTexture();
@@ -570,7 +570,7 @@ function initTexture() {
     marsBuffers.texture.image.onload = function () {
         handleLoadedTexture(marsBuffers.texture);
     };
-    marsBuffers.texture.image.src = "../../assets/mars.gif";
+    marsBuffers.texture.image.src = "../assets/mars.gif";
 
     // jupiter texture
     jupiterBuffers.texture = gl.createTexture();
@@ -578,7 +578,7 @@ function initTexture() {
     jupiterBuffers.texture.image.onload = function () {
         handleLoadedTexture(jupiterBuffers.texture);
     };
-    jupiterBuffers.texture.image.src = "../../assets/jupiter.gif";
+    jupiterBuffers.texture.image.src = "../assets/jupiter.gif";
 
     // saturn texture
     saturnBuffers.texture = gl.createTexture();
@@ -586,7 +586,7 @@ function initTexture() {
     saturnBuffers.texture.image.onload = function () {
         handleLoadedTexture(saturnBuffers.texture);
     };
-    saturnBuffers.texture.image.src = "../../assets/saturn.gif";
+    saturnBuffers.texture.image.src = "../assets/saturn.gif";
 
     // uranus texture
     uranusBuffers.texture = gl.createTexture();
@@ -594,7 +594,7 @@ function initTexture() {
     uranusBuffers.texture.image.onload = function () {
         handleLoadedTexture(uranusBuffers.texture);
     };
-    uranusBuffers.texture.image.src = "../../assets/uranus.gif";
+    uranusBuffers.texture.image.src = "../assets/uranus.gif";
 
     // neptune texture
     neptuneBuffers.texture = gl.createTexture();
@@ -602,7 +602,7 @@ function initTexture() {
     neptuneBuffers.texture.image.onload = function () {
         handleLoadedTexture(neptuneBuffers.texture);
     };
-    neptuneBuffers.texture.image.src = "../../assets/neptune.gif";
+    neptuneBuffers.texture.image.src = "../assets/neptune.gif";
 }
 
 
