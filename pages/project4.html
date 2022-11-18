@@ -74,8 +74,20 @@
     <!-- Vertex shader -->
     <script type="text/javascript" src="../lib/gl-matrix-2.7.0.min.js"></script>
     <script type="text/javascript" src="../lib/webgl-utils.js"></script>
-    <script type="text/javascript" src="../scripts/app.js"></script>
     <script type="text/javascript">
+      // Initialize GL
+      var gl;
+      function initGL(canvas) {
+        try {
+          gl = canvas.getContext("experimental-webgl");
+          gl.viewportWidth = canvas.width;
+          gl.viewportHeight = canvas.height;
+        } catch (e) {}
+        if (!gl) {
+          alert("Could not initialize WebGL");
+        }
+      }
+
       var canvas;
       function webGLStart() {
         canvas = document.getElementById("webGLcanvas");

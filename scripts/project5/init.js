@@ -73,19 +73,78 @@ function initTexture() {
     sphereBuffer.texture.image.src = "../assets/neptune.gif";
 }
 
-// reads the texture image and saves it to the variable provided
-function handleLoadedTexture(texture) {
-    gl.bindTexture(gl.TEXTURE_2D, texture);
-    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
-    gl.texImage2D(
-        gl.TEXTURE_2D,
-        0,
-        gl.RGBA,
-        gl.RGBA,
-        gl.UNSIGNED_BYTE,
-        texture.image
+// Initialize shader programs
+var shaderProgram;
+function initShaders() {
+    const fragmentShader = getShader(gl, "shader-fs");
+    const vertexShader = getShader(gl, "shader-vs");
+
+    // Create the program, then attach and link
+    shaderProgram = gl.createProgram();
+    gl.attachShader(shaderProgram, vertexShader);
+    gl.attachShader(shaderProgram, fragmentShader);
+    gl.linkProgram(shaderProgram);
+
+    // Check for linker errors
+    if (!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS)) {
+        alert("Could not initialize shaders");
+    }
+
+    // Attach shaderprogram to openGL context
+    gl.useProgram(shaderProgram);
+
+    // position data
+    shaderProgram.vertexPositionAttribute = gl.getAttribLocation(
+        shaderProgram,
+        "aVertexPosition"
     );
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-    gl.bindTexture(gl.TEXTURE_2D, null);
+    gl.enableVertexAttribArray(shaderProgram.vertexPositionAttribute);
+
+    // lighting data
+    shaderProgram.vertexNormalAttribute = gl.getAttribLocation(
+        shaderProgram,
+        "aVertexNormal"
+    );
+    gl.enableVertexAttribArray(shaderProgram.vertexNormalAttribute);
+
+    // texture data
+    shaderProgram.textureCoordAttribute = gl.getAttribLocation(
+        shaderProgram,
+        "aTextureCoord"
+    );
+    gl.enableVertexAttribArray(shaderProgram.textureCoordAttribute);
+
+    // send uniform data to the shaders
+    shaderProgram.pMatrixUniform = gl.getUniformLocation(
+        shaderProgram,
+        "uPMatrix"
+    );
+    shaderProgram.mvMatrixUniform = gl.getUniformLocation(
+        shaderProgram,
+        "uMVMatrix"
+    );
+    shaderProgram.nMatrixUniform = gl.getUniformLocation(
+        shaderProgram,
+        "uNMatrix"
+    );
+    shaderProgram.samplerUniform = gl.getUniformLocation(
+        shaderProgram,
+        "uSampler"
+    );
+    shaderProgram.useLightingUniform = gl.getUniformLocation(
+        shaderProgram,
+        "uUseLighting"
+    );
+    shaderProgram.ambientColorUniform = gl.getUniformLocation(
+        shaderProgram,
+        "uAmbientColor"
+    );
+    shaderProgram.lightingDirectionUniform = gl.getUniformLocation(
+        shaderProgram,
+        "uLightingDirection"
+    );
+    shaderProgram.directionalColorUniform = gl.getUniformLocation(
+        shaderProgram,
+        "uDirectionalColor"
+    );
 }

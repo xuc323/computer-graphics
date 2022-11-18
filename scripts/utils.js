@@ -1,3 +1,49 @@
+// Compile and return the shader program
+function getShader(gl, id) {
+    // Load the shader code by it's ID, as assigned in the script element (e.g. "shader-fs" or "shader-vs")
+    const shaderScript = document.getElementById(id);
+    if (!shaderScript) {
+        return null;
+    }
+
+    let k = shaderScript.firstChild;
+    let str = "";
+    // While firstChild exists
+    while (k) {
+        // If the firstChild is a TEXT type document
+        if (k.nodeType == 3) {
+            // Append the text to str
+            str += k.textContent;
+        }
+        k = k.nextSibling;
+    }
+
+    let shader;
+    if (shaderScript.type == "x-shader/x-fragment") {
+        shader = gl.createShader(gl.FRAGMENT_SHADER);
+    } else if (shaderScript.type == "x-shader/x-vertex") {
+        shader = gl.createShader(gl.VERTEX_SHADER);
+    } else {
+        return null;
+    }
+
+    // Now we have the type and the code, and we
+    // provide it to openGL as such, then compile the shader code
+    gl.shaderSource(shader, str);
+    gl.compileShader(shader);
+
+    // If the compilation of the shader code fails, report the error
+    // and return nothing, since the shader failed to compile
+    if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+        alert(gl.getShaderInfoLog(shader));
+        return null;
+    }
+
+    // If there were no errors in compilation, return the compiled shader
+    return shader;
+}
+
+
 // helper function to create a sphere
 function createSphere(radius, slices, stacks) {
     let vertices = [], // vertex positions
@@ -181,6 +227,23 @@ function setMatrixUniforms() {
     mat3.invert(normalMatrix, normalMatrix);
     mat3.transpose(normalMatrix, normalMatrix);
     gl.uniformMatrix3fv(shaderProgram.nMatrixUniform, false, normalMatrix);
+}
+
+// reads the texture image and saves it to the variable provided
+function handleLoadedTexture(texture) {
+    gl.bindTexture(gl.TEXTURE_2D, texture);
+    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+    gl.texImage2D(
+        gl.TEXTURE_2D,
+        0,
+        gl.RGBA,
+        gl.RGBA,
+        gl.UNSIGNED_BYTE,
+        texture.image
+    );
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+    gl.bindTexture(gl.TEXTURE_2D, null);
 }
 
 var mouseDown = false;
