@@ -10,13 +10,18 @@
       // sets the precision of vColor
       precision mediump float;
 
-      // The variable labeled varying is input
-      // vColor is interpolated over vertices
-      varying vec4 vColor;
+      // input texture coordinate
+      // webGL figures out the interpolated coordinates along the texture
+      varying vec2 vTextureCoord;
+
+      // a sampler is shader's representation of the texture
+      uniform sampler2D uSampler;
 
       void main(void) {
-        // assign the pixel color to the interpolated color
-        gl_FragColor = vColor;
+        // texture2D gets the appropriate pixel color from the texture
+        // s and t are normally used for texture coordinates, and
+        // webGL supports them.
+        gl_FragColor = texture2D(uSampler, vec2(vTextureCoord.s, vTextureCoord.t));
       }
     </script>
     <script id="shader-vs" type="x-shader/x-vertex">
@@ -24,21 +29,21 @@
       // different for each vertex in the rendering call input: vertex position
       attribute vec3 aVertexPosition;
 
-      // vertex color
-      attribute vec4 aVertexColor;
-      varying vec4 vColor;
+      // vertex texture
+      attribute vec2 aTextureCoord;
+      varying vec2 vTextureCoord;
 
       // Uniforms are inputs provided for ALL vertices,
       // the same for all vertices in any rendering call
       uniform mat4 uMVMatrix;
       uniform mat4 uPMatrix;
 
+
       void main(void) {
         gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
 
         // pass vertex color to fragment shader
-        vColor = aVertexColor;
-        gl_PointSize = 10.0;
+        vTextureCoord = aTextureCoord;
       }
     </script>
     <script type="text/javascript" src="../lib/gl-matrix-2.7.0.min.js"></script>
@@ -129,12 +134,12 @@
         );
         gl.enableVertexAttribArray(shaderProgram.vertexPositionAttribute);
 
-        // color data
-        shaderProgram.vertexColorAttribute = gl.getAttribLocation(
+        // texture data
+        shaderProgram.textureCoordAttribute = gl.getAttribLocation(
           shaderProgram,
-          "aVertexColor"
+          "aTextureCoord"
         );
-        gl.enableVertexAttribArray(shaderProgram.vertexColorAttribute);
+        gl.enableVertexAttribArray(shaderProgram.textureCoordAttribute);
 
         // send uniform data to the shaders
         shaderProgram.pMatrixUniform = gl.getUniformLocation(
@@ -145,14 +150,20 @@
           shaderProgram,
           "uMVMatrix"
         );
+        shaderProgram.samplerUniform = gl.getUniformLocation(
+          shaderProgram,
+          "uSampler"
+        );
       }
+
+      ///////////////////////////////////////////
+      ///// Initialize buffers and textures /////
+      ///////////////////////////////////////////
 
       // Geometry buffer
       var spherePositionBuffer;
-      // Color buffer
-      var sphereColorBuffer;
-      // Normal buffer
-      var sphereNormalBuffer;
+      // Texture buffer
+      var sphereTextureBuffer;
 
       // We will generate the geometry with this function
       function initBuffers() {
@@ -167,24 +178,48 @@
           stacks = 12,
           count = 0;
         let vertices = [],
-          colors = [],
           normals = [];
         for (let t = 0; t < stacks; t++) {
           const phi1 = (t / stacks) * Math.PI;
           const phi2 = ((t + 1) / stacks) * Math.PI;
           for (let p = 0; p < slices + 1; p++) {
-            const theta = (p / slices) * 2 * Math.PI;
-            let xVal = radius * Math.cos(theta) * Math.sin(phi1);
-            let yVal = radius * Math.sin(theta) * Math.sin(phi1);
+            const theta1 = (p / slices) * 2 * Math.PI;
+            const theta2 = ((p + 1) / slices) * 2 * Math.PI;
+
+            let xVal = radius * Math.cos(theta1) * Math.sin(phi1);
+            let yVal = radius * Math.sin(theta1) * Math.sin(phi1);
             let zVal = radius * Math.cos(phi1);
             vertices = vertices.concat([xVal, yVal, zVal]);
-            colors = colors.concat([1.0, 1.0, 1.0, 1.0]);
             count++;
-            xVal = radius * Math.cos(theta) * Math.sin(phi2);
-            yVal = radius * Math.sin(theta) * Math.sin(phi2);
+
+            xVal = radius * Math.cos(theta1) * Math.sin(phi2);
+            yVal = radius * Math.sin(theta1) * Math.sin(phi2);
             zVal = radius * Math.cos(phi2);
             vertices = vertices.concat([xVal, yVal, zVal]);
-            colors = colors.concat([1.0, 1.0, 1.0, 1.0]);
+            count++;
+
+            xVal = radius * Math.cos(theta2) * Math.sin(phi1);
+            yVal = radius * Math.sin(theta2) * Math.sin(phi1);
+            zVal = radius * Math.cos(phi1);
+            vertices = vertices.concat([xVal, yVal, zVal]);
+            count++;
+
+            xVal = radius * Math.cos(theta2) * Math.sin(phi1);
+            yVal = radius * Math.sin(theta2) * Math.sin(phi1);
+            zVal = radius * Math.cos(phi1);
+            vertices = vertices.concat([xVal, yVal, zVal]);
+            count++;
+
+            xVal = radius * Math.cos(theta1) * Math.sin(phi2);
+            yVal = radius * Math.sin(theta1) * Math.sin(phi2);
+            zVal = radius * Math.cos(phi2);
+            vertices = vertices.concat([xVal, yVal, zVal]);
+            count++;
+
+            xVal = radius * Math.cos(theta2) * Math.sin(phi2);
+            yVal = radius * Math.sin(theta2) * Math.sin(phi2);
+            zVal = radius * Math.cos(phi2);
+            vertices = vertices.concat([xVal, yVal, zVal]);
             count++;
           }
         }
@@ -195,23 +230,74 @@
         );
         // item size is always 3 (3d vector describing position)
         spherePositionBuffer.itemSize = 3;
-        // numItems is the number of vertices in the triangle strip (2 * (slices + 1) * stacks)
-        spherePositionBuffer.numItems = 2 * (slices + 1) * stacks;
+        // numItems is the number of vertices in the triangle (2 * (slices + 1) * stacks)
+        spherePositionBuffer.numItems = 6 * (slices + 1) * stacks;
 
-        // colors
-        sphereColorBuffer = gl.createBuffer();
-        gl.bindBuffer(gl.ARRAY_BUFFER, sphereColorBuffer);
+        let textureCoords = [];
+        for (t = 0; t < stacks; t++) {
+          const phi1 = t / stacks;
+          const phi2 = (t + 1) / stacks;
+          for (p = 0; p < slices + 1; p++) {
+            const theta1 = 1 - p / slices;
+            const theta2 = 1 - (p + 1) / slices;
+
+            textureCoords = textureCoords.concat([theta1, phi1]);
+            textureCoords = textureCoords.concat([theta1, phi2]);
+            textureCoords = textureCoords.concat([theta2, phi1]);
+            textureCoords = textureCoords.concat([theta2, phi1]);
+            textureCoords = textureCoords.concat([theta1, phi2]);
+            textureCoords = textureCoords.concat([theta2, phi2]);
+          }
+        }
+
+        sphereTextureBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, sphereTextureBuffer);
         gl.bufferData(
           gl.ARRAY_BUFFER,
-          new Float32Array(colors),
+          new Float32Array(textureCoords),
           gl.STATIC_DRAW
         );
-        sphereColorBuffer.itemSize = 4;
-        sphereColorBuffer.numItems = 2 * (slices + 1) * stacks;
+        sphereTextureBuffer.itemSize = 2;
+        sphereTextureBuffer.numItems = 6 * (slices + 1) * stacks;
+        gl.bindBuffer(gl.ARRAY_BUFFER, null);
         /*************************
          * END SPHERE BUFFER
          *************************/
       }
+
+      // generate texture
+      var worldTexture;
+      function initTexture() {
+        worldTexture = gl.createTexture();
+        worldTexture.image = new Image();
+
+        worldTexture.image.onload = function () {
+          handleLoadedTexture(worldTexture);
+        };
+
+        worldTexture.image.src = "../assets/sun.gif";
+      }
+
+      // reads the texture image and saves it to the variable provided
+      function handleLoadedTexture(texture) {
+        gl.bindTexture(gl.TEXTURE_2D, texture);
+        gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+        gl.texImage2D(
+          gl.TEXTURE_2D,
+          0,
+          gl.RGBA,
+          gl.RGBA,
+          gl.UNSIGNED_BYTE,
+          texture.image
+        );
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+        gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+        gl.bindTexture(gl.TEXTURE_2D, null);
+      }
+
+      ///////////////////////////////////////////
+      ////////// Start drawing scenes ///////////
+      ///////////////////////////////////////////
 
       // Here we connect the uniform matrices
       function setMatrixUniforms() {
@@ -242,6 +328,7 @@
         mat4.identity(mvMatrix);
         // set the position of the sphere
         mat4.translate(mvMatrix, mvMatrix, [0, 0, -7.0]);
+        mat4.rotate(mvMatrix, mvMatrix, degToRad(xRot), [0, 1, 0]);
 
         // positions
         gl.bindBuffer(gl.ARRAY_BUFFER, spherePositionBuffer);
@@ -254,21 +341,26 @@
           0
         );
 
-        // colors
-        gl.bindBuffer(gl.ARRAY_BUFFER, sphereColorBuffer);
+        // texture coordinates
+        gl.bindBuffer(gl.ARRAY_BUFFER, sphereTextureBuffer);
         gl.vertexAttribPointer(
-          shaderProgram.vertexColorAttribute,
-          sphereColorBuffer.itemSize,
+          shaderProgram.textureCoordAttribute,
+          sphereTextureBuffer.itemSize,
           gl.FLOAT,
           false,
           0,
           0
         );
 
+        gl.activeTexture(gl.TEXTURE0);
+        gl.bindTexture(gl.TEXTURE_2D, worldTexture);
+        gl.uniform1i(shaderProgram.samplerUniform, 0);
+
         // set uniform variable in vertex shader
         setMatrixUniforms();
         // draw the line
         gl.drawArrays(gl.TRIANGLES, 0, spherePositionBuffer.numItems);
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
         /*************************
          * END DRAWING SPHERE
          *************************/
@@ -287,6 +379,7 @@
         // Load the shaders and buffers into the GPU
         initShaders();
         initBuffers();
+        initTexture();
 
         // Set the background color to opaque black
         gl.clearColor(0.0, 0.0, 0.0, 1.0);
@@ -302,7 +395,30 @@
       function tick() {
         requestAnimFrame(tick); // infinite recursive call
         resize(canvas); // resize the canvas to the window size
+        animate(); // animate the sphere
         drawScene(); // draw the scene
+      }
+
+      ///////////////////////////////////////////
+      //////////// Handle animations ////////////
+      ///////////////////////////////////////////
+
+      let lastTime = 0;
+      let xRot = 0;
+      let xSpeed = 30;
+      function animate() {
+        const timeNow = new Date().getTime();
+        if (lastTime != 0) {
+          const elapsed = timeNow - lastTime;
+          // update the rotation to the current time
+          xRot += (xSpeed * elapsed) / 1000.0;
+          if (xRot > 360) xRot -= 360;
+        }
+        lastTime = timeNow;
+      }
+
+      function degToRad(degrees) {
+        return (degrees * Math.PI) / 180;
       }
 
       // Hanldes resize of the canvas
