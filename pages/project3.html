@@ -227,7 +227,7 @@
         // positions
         spherePositionBuffer = gl.createBuffer();
         gl.bindBuffer(gl.ARRAY_BUFFER, spherePositionBuffer);
-        let radius = 0.5,
+        let radius = 0.3,
           slices = 25,
           stacks = 12,
           count = 0;
@@ -311,7 +311,7 @@
         mat4.translate(mvMatrix, mvMatrix, [
           squarePositionX,
           squarePositionY,
-          -30.0,
+          -20.0,
         ]);
 
         // positions
@@ -383,7 +383,7 @@
         mat4.translate(mvMatrix, mvMatrix, [
           spherePositionX,
           spherePositionY,
-          -30.0,
+          -20.0,
         ]);
 
         // positions
@@ -599,19 +599,31 @@
       function handleKeys() {
         // left arrow
         if (currentlyPressedKeys[37]) {
-          squarePositionX -= 0.1;
+          const tempX = squarePositionX - 0.1;
+          if (tempX > -15.0) {
+            squarePositionX = tempX;
+          }
         }
         // right arrow
         if (currentlyPressedKeys[39]) {
-          squarePositionX += 0.1;
+          const tempX = squarePositionX + 0.1;
+          if (tempX < 15.0) {
+            squarePositionX = tempX;
+          }
         }
         // down arrow
         if (currentlyPressedKeys[40]) {
-          squarePositionY -= 0.1;
+          const tempY = squarePositionY - 0.1;
+          if (tempY > -6.0) {
+            squarePositionY = tempY;
+          }
         }
         // up arrow
         if (currentlyPressedKeys[38]) {
-          squarePositionY += 0.1;
+          const tempY = squarePositionY + 0.1;
+          if (tempY < 6.0) {
+            squarePositionY = tempY;
+          }
         }
       }
     </script>
