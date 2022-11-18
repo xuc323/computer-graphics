@@ -147,11 +147,6 @@
         );
       }
 
-      /**
-       * Define variables
-       */
-
-      // initBuffers()
       // Geometry buffer
       var squarePositionBuffer;
       var spherePositionBuffer;
@@ -164,10 +159,6 @@
         squareNegativeSideX = -5.0,
         squarePositiveSideY = 5.0,
         squareNegativeSideY = -5.0;
-
-      /**
-       * End defining variables
-       */
 
       // We will generate the geometry with this function
       function initBuffers() {
@@ -317,27 +308,6 @@
         // reset the model view matrix
         mat4.identity(mvMatrix);
         // set the position of the line square
-        if (document.getElementById("negativeX").value) {
-          squareNegativeSideX = parseFloat(
-            document.getElementById("negativeX").value
-          );
-        }
-        if (document.getElementById("positiveX").value) {
-          squarePositiveSideX = parseFloat(
-            document.getElementById("positiveX").value
-          );
-        }
-        if (document.getElementById("positiveY").value) {
-          squarePositiveSideY = parseFloat(
-            document.getElementById("positiveY").value
-          );
-        }
-        if (document.getElementById("negativeY").value) {
-          squareNegativeSideY = parseFloat(
-            document.getElementById("negativeY").value
-          );
-        }
-
         mat4.translate(mvMatrix, mvMatrix, [
           squarePositionX,
           squarePositionY,
@@ -407,7 +377,9 @@
         /*************************
          * START DRAWING SPHERE
          *************************/
+        // reset the model view matrix
         mat4.identity(mvMatrix);
+        // set the position of the sphere
         mat4.translate(mvMatrix, mvMatrix, [
           spherePositionX,
           spherePositionY,
@@ -487,11 +459,12 @@
 
       // Handles the moment by moment re-rendering
       function tick() {
-        requestAnimFrame(tick);
-        resize(canvas);
-        animate();
-        handleKeys();
-        drawScene();
+        requestAnimFrame(tick); // infinite recursive call
+        resize(canvas); // resize the canvas to the window size
+        squareResize(); // resize the square
+        drawScene(); // draw the scene
+        handleKeys(); // handle the keys pressed
+        animate(); // animate the sphere
 
         posXnode.nodeValue = spherePositionX;
         posYnode.nodeValue = spherePositionY;
@@ -514,11 +487,65 @@
         }
       }
 
+      // handles the resize of the square and the reposition of the sphere
+      function squareResize() {
+        if (document.getElementById("negativeX").value) {
+          squareNegativeSideX = parseFloat(
+            document.getElementById("negativeX").value
+          );
+        }
+        if (document.getElementById("positiveX").value) {
+          squarePositiveSideX = parseFloat(
+            document.getElementById("positiveX").value
+          );
+        }
+        if (document.getElementById("positiveY").value) {
+          squarePositiveSideY = parseFloat(
+            document.getElementById("positiveY").value
+          );
+        }
+        if (document.getElementById("negativeY").value) {
+          squareNegativeSideY = parseFloat(
+            document.getElementById("negativeY").value
+          );
+        }
+        // if the sphere is outside when the square is resized
+        if (
+          spherePositionX > squarePositiveSideX + squarePositionX ||
+          spherePositionX < squareNegativeSideX + squarePositionX ||
+          spherePositionY > squarePositiveSideY + squarePositionY ||
+          spherePositionY < squareNegativeSideY + squarePositionY
+        ) {
+          spherePositionX =
+            (squarePositiveSideX + squareNegativeSideX) / 2 + squarePositionX;
+          spherePositionY =
+            (squarePositiveSideY + squareNegativeSideY) / 2 + squarePositionY;
+          sphereXspeed = Math.random() * 30;
+          sphereYspeed = Math.random() * 30;
+        }
+        // if the sqare is inside out, reset to original state
+        if (
+          squareNegativeSideX >= squarePositiveSideX ||
+          squareNegativeSideY >= squarePositiveSideY
+        ) {
+          alert("Invalid square");
+          document.getElementById("negativeX").value = -5.0;
+          squareNegativeSideX = -5.0;
+          document.getElementById("positiveX").value = 5.0;
+          squarePositiveSideX = 5.0;
+          document.getElementById("positiveY").value = 5.0;
+          squarePositiveSideY = 5.0;
+          document.getElementById("negativeY").value = -5.0;
+          squareNegativeSideY = -5.0;
+        }
+      }
+
       // Provide variables for rotate animation
       var lastTime = 0; // previous timestamp
       // the positions of the sphere
-      var spherePositionX = 0.0,
-        spherePositionY = 0.0;
+      var spherePositionX = Math.random() * 10 - 5,
+        spherePositionY = Math.random() * 10 - 5;
+      // the speed of the sphere
       var sphereXspeed = Math.random() * 30,
         sphereYspeed = Math.random() * 30;
       function animate() {
