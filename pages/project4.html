@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CSE 313 Project 4</title>
+    <!-- scripts -->
+    <script id="shader-fs" type="x-shader/x-fragment">
+      // sets the precision of vColor
+      precision mediump float;
+
+      // The variable labeled varying is input
+      // vColor is interpolated over vertices
+      varying vec4 vColor;
+
+      void main(void) {
+        // assign the pixel color to the interpolated color
+        gl_FragColor = vColor;
+      }
+    </script>
+    <script id="shader-vs" type="x-shader/x-vertex">
+      // Attributes are inputs provided for each vertex,
+      // different for each vertex in the rendering call input: vertex position
+      attribute vec3 aVertexPosition;
+
+      // vertex color
+      attribute vec4 aVertexColor;
+      varying vec4 vColor;
+
+      // Uniforms are inputs provided for ALL vertices,
+      // the same for all vertices in any rendering call
+      uniform mat4 uMVMatrix;
+      uniform mat4 uPMatrix;
+
+      void main(void) {
+        gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
+
+        // pass vertex color to fragment shader
+        vColor = aVertexColor;
+        gl_PointSize = 10.0;
+      }
+    </script>
+    <script type="text/javascript" src="../lib/gl-matrix-2.7.0.min.js"></script>
+    <script type="text/javascript" src="../lib/webgl-utils.js"></script>
+    <script type="text/javascript">
+      // Initialize GL
+      var gl;
+      function initGL(canvas) {
+        try {
+          gl = canvas.getContext("experimental-webgl");
+          gl.viewportWidth = canvas.width;
+          gl.viewportHeight = canvas.height;
+        } catch (e) {}
+        if (!gl) {
+          alert("Could not initialize WebGL");
+        }
+      }
+
+      // Compile and return the shader program
+      function getShader(gl, id) {
+        // Load the shader code by it's ID, as assigned in the script element (e.g. "shader-fs" or "shader-vs")
+        const shaderScript = document.getElementById(id);
+        if (!shaderScript) {
+          return null;
+        }
+
+        let k = shaderScript.firstChild;
+        let str = "";
+        // While firstChild exists
+        while (k) {
+          // If the firstChild is a TEXT type document
+          if (k.nodeType == 3) {
+            // Append the text to str
+            str += k.textContent;
+          }
+          k = k.nextSibling;
+        }
+
+        let shader;
+        if (shaderScript.type == "x-shader/x-fragment") {
+          shader = gl.createShader(gl.FRAGMENT_SHADER);
+        } else if (shaderScript.type == "x-shader/x-vertex") {
+          shader = gl.createShader(gl.VERTEX_SHADER);
+        } else {
+          return null;
+        }
+
+        // Now we have the type and the code, and we
+        // provide it to openGL as such, then compile the shader code
+        gl.shaderSource(shader, str);
+        gl.compileShader(shader);
+
+        // If the compilation of the shader code fails, report the error
+        // and return nothing, since the shader failed to compile
+        if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+          alert(gl.getShaderInfoLog(shader));
+          return null;
+        }
+
+        // If there were no errors in compilation, return the compiled shader
+        return shader;
+      }
+
+      // Initialize shader programs
+      var shaderProgram;
+      function initShaders() {
+        const fragmentShader = getShader(gl, "shader-fs");
+        const vertexShader = getShader(gl, "shader-vs");
+
+        // Create the program, then attach and link
+        shaderProgram = gl.createProgram();
+        gl.attachShader(shaderProgram, vertexShader);
+        gl.attachShader(shaderProgram, fragmentShader);
+        gl.linkProgram(shaderProgram);
+
+        // Check for linder errors
+        if (!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS)) {
+          alert("Could not initialize shaders");
+        }
+
+        // Attach shaderprogram to openGL context
+        gl.useProgram(shaderProgram);
+
+        // position data
+        shaderProgram.vertexPositionAttribute = gl.getAttribLocation(
+          shaderProgram,
+          "aVertexPosition"
+        );
+        gl.enableVertexAttribArray(shaderProgram.vertexPositionAttribute);
+
+        // color data
+        shaderProgram.vertexColorAttribute = gl.getAttribLocation(
+          shaderProgram,
+          "aVertexColor"
+        );
+        gl.enableVertexAttribArray(shaderProgram.vertexColorAttribute);
+
+        // send uniform data to the shaders
+        shaderProgram.pMatrixUniform = gl.getUniformLocation(
+          shaderProgram,
+          "uPMatrix"
+        );
+        shaderProgram.mvMatrixUniform = gl.getUniformLocation(
+          shaderProgram,
+          "uMVMatrix"
+        );
+      }
+
+      // Geometry buffer
+      var spherePositionBuffer;
+      // Color buffer
+      var sphereColorBuffer;
+      // Normal buffer
+      var sphereNormalBuffer;
+
+      // We will generate the geometry with this function
+      function initBuffers() {
+        /*************************
+         * START SPHERE BUFFER
+         *************************/
+        // positions
+        spherePositionBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, spherePositionBuffer);
+        let radius = 2.0,
+          slices = 25,
+          stacks = 12,
+          count = 0;
+        let vertices = [],
+          colors = [],
+          normals = [];
+        for (let t = 0; t < stacks; t++) {
+          const phi1 = (t / stacks) * Math.PI;
+          const phi2 = ((t + 1) / stacks) * Math.PI;
+          for (let p = 0; p < slices + 1; p++) {
+            const theta = (p / slices) * 2 * Math.PI;
+            let xVal = radius * Math.cos(theta) * Math.sin(phi1);
+            let yVal = radius * Math.sin(theta) * Math.sin(phi1);
+            let zVal = radius * Math.cos(phi1);
+            vertices = vertices.concat([xVal, yVal, zVal]);
+            colors = colors.concat([1.0, 1.0, 1.0, 1.0]);
+            count++;
+            xVal = radius * Math.cos(theta) * Math.sin(phi2);
+            yVal = radius * Math.sin(theta) * Math.sin(phi2);
+            zVal = radius * Math.cos(phi2);
+            vertices = vertices.concat([xVal, yVal, zVal]);
+            colors = colors.concat([1.0, 1.0, 1.0, 1.0]);
+            count++;
+          }
+        }
+        gl.bufferData(
+          gl.ARRAY_BUFFER,
+          new Float32Array(vertices),
+          gl.STATIC_DRAW
+        );
+        // item size is always 3 (3d vector describing position)
+        spherePositionBuffer.itemSize = 3;
+        // numItems is the number of vertices in the triangle strip (2 * (slices + 1) * stacks)
+        spherePositionBuffer.numItems = 2 * (slices + 1) * stacks;
+
+        // colors
+        sphereColorBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, sphereColorBuffer);
+        gl.bufferData(
+          gl.ARRAY_BUFFER,
+          new Float32Array(colors),
+          gl.STATIC_DRAW
+        );
+        sphereColorBuffer.itemSize = 4;
+        sphereColorBuffer.numItems = 2 * (slices + 1) * stacks;
+        /*************************
+         * END SPHERE BUFFER
+         *************************/
+      }
+
+      // Here we connect the uniform matrices
+      function setMatrixUniforms() {
+        gl.uniformMatrix4fv(shaderProgram.pMatrixUniform, false, pMatrix);
+        gl.uniformMatrix4fv(shaderProgram.mvMatrixUniform, false, mvMatrix);
+      }
+
+      // Main function to draw everything on the viewport
+      var mvMatrix = mat4.create();
+      var pMatrix = mat4.create();
+      function drawScene() {
+        gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
+        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+        // allocate a perspective matrix in pMatrix
+        mat4.perspective(
+          pMatrix,
+          45,
+          gl.viewportWidth / gl.viewportHeight,
+          0.1,
+          100.0
+        );
+
+        /*************************
+         * START DRAWING SPHERE
+         *************************/
+        // reset the model view matrix
+        mat4.identity(mvMatrix);
+        // set the position of the sphere
+        mat4.translate(mvMatrix, mvMatrix, [0, 0, -7.0]);
+
+        // positions
+        gl.bindBuffer(gl.ARRAY_BUFFER, spherePositionBuffer);
+        gl.vertexAttribPointer(
+          shaderProgram.vertexPositionAttribute,
+          spherePositionBuffer.itemSize,
+          gl.FLOAT,
+          false,
+          0,
+          0
+        );
+
+        // colors
+        gl.bindBuffer(gl.ARRAY_BUFFER, sphereColorBuffer);
+        gl.vertexAttribPointer(
+          shaderProgram.vertexColorAttribute,
+          sphereColorBuffer.itemSize,
+          gl.FLOAT,
+          false,
+          0,
+          0
+        );
+
+        // set uniform variable in vertex shader
+        setMatrixUniforms();
+        // draw the line
+        gl.drawArrays(gl.TRIANGLES, 0, spherePositionBuffer.numItems);
+        /*************************
+         * END DRAWING SPHERE
+         *************************/
+      }
+
+      var canvas;
+      function webGLStart() {
+        canvas = document.getElementById("webGLcanvas");
+
+        canvas.width = window.innerWidth - 20;
+        canvas.height = window.innerHeight - 20;
+
+        // Create the GL viewport
+        initGL(canvas);
+
+        // Load the shaders and buffers into the GPU
+        initShaders();
+        initBuffers();
+
+        // Set the background color to opaque black
+        gl.clearColor(0.0, 0.0, 0.0, 1.0);
+
+        // Render only pixels in front of the others
+        gl.enable(gl.DEPTH_TEST);
+
+        // Render the scene
+        tick();
+      }
+
+      // Handles the moment by moment re-rendering
+      function tick() {
+        requestAnimFrame(tick); // infinite recursive call
+        resize(canvas); // resize the canvas to the window size
+        drawScene(); // draw the scene
+      }
+
+      // Hanldes resize of the canvas
+      function resize(canvas) {
+        // browser width
+        const dispWidth = window.innerWidth - 20;
+        // browser height
+        const dispHeight = window.innerHeight - 20;
+
+        // check if the canvas is not the same size
+        if (canvas.width != dispWidth || canvas.height != dispHeight) {
+          canvas.width = dispWidth;
+          canvas.height = dispHeight;
+          gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
+          gl.viewportWidth = canvas.width;
+          gl.viewportHeight = canvas.height;
+        }
+      }
+    </script>
+  </head>
+
+  <body onload="webGLStart();">
+    <canvas id="webGLcanvas" style="border: none"> </canvas>
+    <footer>
+      Lehigh University &bullet; CSE 313 Computer Graphics &bullet; Fall 2022
+    </footer>
+  </body>
+</html>
