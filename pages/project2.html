@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CSE 313 Project 2</title>
+    <!-- scripts -->
+    <script id="shader-fs" type="x-shader/x-fragment">
+      // sets the precision of vColor
+      precision mediump float;
+
+      // The variable labeled varying is input
+      // vColor is interpolated over vertices
+      varying vec4 vColor;
+
+      void main(void) {
+        // assign the pixel color to the interpolated color
+        gl_FragColor = vColor;
+      }
+    </script>
+    <script id="shader-vs" type="x-shader/x-vertex">
+      // Attributes are inputs provided for each vertex,
+      // different for each vertex in the rendering call input: vertex position
+      attribute vec3 aVertexPosition;
+
+      // vertex color
+      attribute vec4 aVertexColor;
+      varying vec4 vColor;
+
+      // Uniforms are inputs provided for ALL vertices, 
+      // the same for all vertices in any rendering call
+      uniform mat4 uMVMatrix;
+      uniform mat4 uPMatrix;
+
+      void main(void) {
+        gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
+
+        // pass vertex color to fragment shader
+        vColor = aVertexColor;
+        gl_PointSize = 10.0;
+      }
+    </script>
+    <script type="text/javascript" src="../lib/gl-matrix-2.7.0.min.js"></script>
+    <script type="text/javascript">
+      var gl;
+
+      function initGL(canvas) {
+        try {
+          gl = canvas.getContext("experimental-webgl");
+          gl.viewportWidth = canvas.width;
+          gl.viewportHeight = canvas.height;
+        } catch (e) {}
+        if (!gl) {
+          alert("Could not initialize WebGL");
+        }
+      }
+
+      function getShader(gl, id) {
+        // Load the shader code by it's ID, as assigned in the script element (e.g. "shader-fs" or "shader-vs")
+        var shaderScript = document.getElementById(id);
+        if (!shaderScript) {
+          return null;
+        }
+
+        var k = shaderScript.firstChild;
+        var str = "";
+        // While firstChild exists
+        while (k) {
+          // If the firstChild is a TEXT type document
+          if (k.nodeType == 3) {
+            // Append the text to str
+            str += k.textContent;
+          }
+          k = k.nextSibling;
+        }
+
+        var shader;
+        if (shaderScript.type == "x-shader/x-fragment") {
+          shader = gl.createShader(gl.FRAGMENT_SHADER);
+        } else if (shaderScript.type == "x-shader/x-vertex") {
+          shader = gl.createShader(gl.VERTEX_SHADER);
+        } else {
+          return null;
+        }
+
+        // Now we have the type and the code, and we
+        // provide it to openGL as such, then compile the shader code
+        gl.shaderSource(shader, str);
+        gl.compileShader(shader);
+
+        // If the compilation of the shader code fails, report the error
+        // and return nothing, since the shader failed to compile
+        if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+          alert(gl.getShaderInfoLog(shader));
+          return null;
+        }
+
+        // If there were no errors in compilation, return the compiled shader
+        return shader;
+      }
+
+      var shaderProgram;
+
+      function initShaders() {
+        var fragmentShader = getShader(gl, "shader-fs");
+        var vertexShader = getShader(gl, "shader-vs");
+
+        // Create the program, then attach and link
+        shaderProgram = gl.createProgram();
+        gl.attachShader(shaderProgram, vertexShader);
+        gl.attachShader(shaderProgram, fragmentShader);
+        gl.linkProgram(shaderProgram);
+
+        // Check for linder errors
+        if (!gl.getProgramParameter(shaderProgram, gl.LINK_STATUS)) {
+          alert("Could not initialize shaders");
+        }
+
+        // Attach shaderprogram to openGL context
+        gl.useProgram(shaderProgram);
+
+        // position data
+        shaderProgram.vertexPositionAttribute = gl.getAttribLocation(
+          shaderProgram,
+          "aVertexPosition"
+        );
+        gl.enableVertexAttribArray(shaderProgram.vertexPositionAttribute);
+
+        // color data
+        shaderProgram.vertexColorAttribute = gl.getAttribLocation(
+          shaderProgram,
+          "aVertexColor"
+        );
+        gl.enableVertexAttribArray(shaderProgram.vertexColorAttribute);
+
+        // send uniform data to the shaders
+        shaderProgram.pMatrixUniform = gl.getUniformLocation(
+          shaderProgram,
+          "uPMatrix"
+        );
+        shaderProgram.mvMatrixUniform = gl.getUniformLocation(
+          shaderProgram,
+          "uMVMatrix"
+        );
+      }
+
+      // This variable is a buffer that holds the geometry
+      var triangleVertexPositionBuffer;
+      var pointPositionBuffer;
+      var triLinePositionBuffer;
+      var triStripPositionBuffer;
+      var triFanPositionBuffer;
+      // Color buffer
+      var triangleVertexColorBuffer;
+      var pointColorBuffer;
+      var triLineColorBuffer;
+      var triStripColorBuffer;
+      var triFanColorBuffer;
+
+      // We will generate the geometry with this function
+      function initBuffers() {
+        // TRIANGLE BUFFER
+        // this holds the positions
+        triangleVertexPositionBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, triangleVertexPositionBuffer);
+        var vertices = [-0.8, 1.0, 0.0, 0.0, -1.0, 0.0, 0.8, 1.0, 0.0];
+        gl.bufferData(
+          gl.ARRAY_BUFFER,
+          new Float32Array(vertices),
+          gl.STATIC_DRAW
+        );
+        triangleVertexPositionBuffer.itemSize = 3;
+        triangleVertexPositionBuffer.numItems = 3;
+
+        // color
+        triangleVertexColorBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, triangleVertexColorBuffer);
+        var colors = [
+          0.84, 0.83, 0.13, 1, 0.5, 0.58, 0.1, 1, 0.82, 0.78, 0.15, 1,
+        ];
+        gl.bufferData(
+          gl.ARRAY_BUFFER,
+          new Float32Array(colors),
+          gl.STATIC_DRAW
+        );
+        triangleVertexColorBuffer.itemSize = 4;
+        triangleVertexColorBuffer.numItems = 3;
+
+        // POINTS BUFFER
+        // positions
+        pointPositionBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, pointPositionBuffer);
+        vertices = [1.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 1.0];
+        gl.bufferData(
+          gl.ARRAY_BUFFER,
+          new Float32Array(vertices),
+          gl.STATIC_DRAW
+        );
+        pointPositionBuffer.itemSize = 3;
+        pointPositionBuffer.numItems = 3;
+
+        // color
+        pointColorBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, pointColorBuffer);
+        colors = [1.0, 0.0, 0.0, 1, 0.0, 1.0, 0.0, 1, 0.0, 0.0, 1.0, 1];
+        gl.bufferData(
+          gl.ARRAY_BUFFER,
+          new Float32Array(colors),
+          gl.STATIC_DRAW
+        );
+        pointColorBuffer.itemSize = 4;
+        pointColorBuffer.numItems = 3;
+
+        // LINE BUFFER
+        // positions
+        triLinePositionBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, triLinePositionBuffer);
+        vertices = [
+          0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0,
+          0.0, 0.0, 0.0, 1.0,
+        ];
+        gl.bufferData(
+          gl.ARRAY_BUFFER,
+          new Float32Array(vertices),
+          gl.STATIC_DRAW
+        );
+        triLinePositionBuffer.itemSize = 3;
+        triLinePositionBuffer.numItems = 6;
+
+        // color
+        triLineColorBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, triLineColorBuffer);
+        colors = [
+          0.0, 0.0, 0.0, 1, 1.0, 0.0, 0.0, 1, 0.0, 0.0, 0.0, 1, 0.0, 1.0, 0.0,
+          1, 0.0, 0.0, 0.0, 1, 0.0, 0.0, 1.0, 1,
+        ];
+        gl.bufferData(
+          gl.ARRAY_BUFFER,
+          new Float32Array(colors),
+          gl.STATIC_DRAW
+        );
+        triLineColorBuffer.itemSize = 4;
+        triLineColorBuffer.numItems = 6;
+
+        // TRIANGLE STRIPS BUFFER
+        // positions
+        triStripPositionBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, triStripPositionBuffer);
+        vertices = [
+          -1.0, 0.0, 0.0, -0.2, 0.8, 0.0, 0.0, 0.0, 0.0, 0.9, 0.8, 0.0, 1.8,
+          0.0, 0.0, 2.6, 0.8, 0.0,
+        ];
+        gl.bufferData(
+          gl.ARRAY_BUFFER,
+          new Float32Array(vertices),
+          gl.STATIC_DRAW
+        );
+        triStripPositionBuffer.itemSize = 3;
+        triStripPositionBuffer.numItems = 6;
+
+        // colors
+        triStripColorBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, triStripColorBuffer);
+        colors = [
+          0.84, 0.46, 0.13, 1, 0.5, 0.58, 0.15, 1, 0.91, 0.9, 0.2, 1, 0.88,
+          0.86, 0.1, 1, 0.6, 0.55, 0.2, 1, 0.85, 0.6, 0.1, 1,
+        ];
+        gl.bufferData(
+          gl.ARRAY_BUFFER,
+          new Float32Array(colors),
+          gl.STATIC_DRAW
+        );
+        triStripColorBuffer.itemSize = 4;
+        triStripColorBuffer.numItems = 6;
+
+        // TRIANGLE FANS BUFFER
+        // positions
+        triFanPositionBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, triFanPositionBuffer);
+        vertices = [
+          0.0, 0.0, 0.0, -0.5, 0.5, 0.0, 0.0, 1.5, 0.0, 0.5, 0.5, 0.0, 1.75,
+          0.0, 0.0, 0.5, -0.25, 0.0, 0.0, -1.0, 0.0, -0.5, -0.25, 0.0, -1.75,
+          0.0, 0.0, -0.5, 0.5, 0.0,
+        ];
+        gl.bufferData(
+          gl.ARRAY_BUFFER,
+          new Float32Array(vertices),
+          gl.STATIC_DRAW
+        );
+        triFanPositionBuffer.itemSize = 3;
+        triFanPositionBuffer.numItems = 10;
+
+        // colors
+        triFanColorBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, triFanColorBuffer);
+        colors = [
+          0.91, 0.92, 0.13, 1, 0.8, 0.82, 0.15, 1, 0.84, 0.45, 0.13, 1, 0.8,
+          0.81, 0.14, 1, 0.85, 0.45, 0.16, 1, 0.79, 0.76, 0.15, 1, 0.72, 0.58,
+          0.3, 1, 0.8, 0.77, 0.1, 1, 0.88, 0.5, 0.1, 1, 0.82, 0.78, 0.12, 1,
+        ];
+        gl.bufferData(
+          gl.ARRAY_BUFFER,
+          new Float32Array(colors),
+          gl.STATIC_DRAW
+        );
+        triFanColorBuffer.itemSize = 4;
+        triFanColorBuffer.numItems = 10;
+      }
+
+      // Here we connect the uniform matrices
+      function setMatrixUniforms() {
+        gl.uniformMatrix4fv(shaderProgram.pMatrixUniform, false, pMatrix);
+        gl.uniformMatrix4fv(shaderProgram.mvMatrixUniform, false, mvMatrix);
+      }
+
+      var mvMatrix = mat4.create();
+      var pMatrix = mat4.create();
+
+      function drawScene() {
+        gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
+        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+
+        // allocate a perspective matrix in pMatrix
+        mat4.perspective(
+          pMatrix,
+          45,
+          gl.viewportWidth / gl.viewportHeight,
+          0.1,
+          100.0
+        );
+
+        // TRIANGLE
+        // allocate an identity matrix in mvMatrix
+        mat4.identity(mvMatrix);
+        // add a translation into mvMatrix
+        mat4.translate(mvMatrix, mvMatrix, [-2, -0.9, -7.0]);
+
+        // working on geometry data
+        gl.bindBuffer(gl.ARRAY_BUFFER, triangleVertexPositionBuffer);
+        // set position attribute in vertex shader
+        gl.vertexAttribPointer(
+          shaderProgram.vertexPositionAttribute,
+          triangleVertexPositionBuffer.itemSize,
+          gl.FLOAT,
+          false,
+          0,
+          0
+        );
+
+        // working on color data
+        gl.bindBuffer(gl.ARRAY_BUFFER, triangleVertexColorBuffer);
+        // set color attribute in vertex shader
+        gl.vertexAttribPointer(
+          shaderProgram.vertexColorAttribute,
+          triangleVertexColorBuffer.itemSize,
+          gl.FLOAT,
+          false,
+          0,
+          0
+        );
+
+        // set uniform variable in vertex shader
+        setMatrixUniforms();
+        // draw the triangle
+        gl.drawArrays(gl.TRIANGLES, 0, triangleVertexPositionBuffer.numItems);
+
+        // POINTS
+        mat4.identity(mvMatrix);
+        mat4.translate(mvMatrix, mvMatrix, [-1.0, 2.0, -7.0]);
+
+        // positions
+        gl.bindBuffer(gl.ARRAY_BUFFER, pointPositionBuffer);
+        gl.vertexAttribPointer(
+          shaderProgram.vertexPositionAttribute,
+          pointPositionBuffer.itemSize,
+          gl.FLOAT,
+          false,
+          0,
+          0
+        );
+
+        // color
+        gl.bindBuffer(gl.ARRAY_BUFFER, pointColorBuffer);
+        gl.vertexAttribPointer(
+          shaderProgram.vertexColorAttribute,
+          pointColorBuffer.itemSize,
+          gl.FLOAT,
+          false,
+          0,
+          0
+        );
+
+        // set uniform variable in vertex shader
+        setMatrixUniforms();
+        // draw the points
+        gl.drawArrays(gl.POINTS, 0, pointPositionBuffer.numItems);
+
+        // LINE
+        mat4.identity(mvMatrix);
+        mat4.translate(mvMatrix, mvMatrix, [0.5, 2.0, -7.0]);
+
+        // positions
+        gl.bindBuffer(gl.ARRAY_BUFFER, triLinePositionBuffer);
+        gl.vertexAttribPointer(
+          shaderProgram.vertexPositionAttribute,
+          triLinePositionBuffer.itemSize,
+          gl.FLOAT,
+          false,
+          0,
+          0
+        );
+
+        // color
+        gl.bindBuffer(gl.ARRAY_BUFFER, triLineColorBuffer);
+        gl.vertexAttribPointer(
+          shaderProgram.vertexColorAttribute,
+          triLineColorBuffer.itemSize,
+          gl.FLOAT,
+          false,
+          0,
+          0
+        );
+
+        // set uniform variable in vertex shader
+        setMatrixUniforms();
+        // draw the line
+        gl.drawArrays(gl.LINES, 0, triLinePositionBuffer.numItems);
+
+        // TRIANGLE STRIP
+        mat4.identity(mvMatrix);
+        mat4.translate(mvMatrix, mvMatrix, [0.8, -1.1, -7.0]);
+
+        // positions
+        gl.bindBuffer(gl.ARRAY_BUFFER, triStripPositionBuffer);
+        gl.vertexAttribPointer(
+          shaderProgram.vertexPositionAttribute,
+          triStripPositionBuffer.itemSize,
+          gl.FLOAT,
+          false,
+          0,
+          0
+        );
+
+        // color
+        gl.bindBuffer(gl.ARRAY_BUFFER, triStripColorBuffer);
+        gl.vertexAttribPointer(
+          shaderProgram.vertexColorAttribute,
+          triStripColorBuffer.itemSize,
+          gl.FLOAT,
+          false,
+          0,
+          0
+        );
+
+        // set uniform variable in vertex shader
+        setMatrixUniforms();
+        // draw the triangle strip
+        gl.drawArrays(gl.TRIANGLE_STRIP, 0, triStripPositionBuffer.numItems);
+
+        // TRIANGLE FANS
+        mat4.identity(mvMatrix);
+        mat4.translate(mvMatrix, mvMatrix, [-2, 0.8, -7.0]);
+
+        // positions
+        gl.bindBuffer(gl.ARRAY_BUFFER, triFanPositionBuffer);
+        gl.vertexAttribPointer(
+          shaderProgram.vertexPositionAttribute,
+          triFanPositionBuffer.itemSize,
+          gl.FLOAT,
+          false,
+          0,
+          0
+        );
+
+        // colors
+        gl.bindBuffer(gl.ARRAY_BUFFER, triFanColorBuffer);
+        gl.vertexAttribPointer(
+          shaderProgram.vertexColorAttribute,
+          triFanColorBuffer.itemSize,
+          gl.FLOAT,
+          false,
+          0,
+          0
+        );
+
+        // set uniform variable in vertex shader
+        setMatrixUniforms();
+        // draw the triangle fan
+        gl.drawArrays(gl.TRIANGLE_FAN, 0, triFanPositionBuffer.numItems);
+      }
+
+      function webGLStart() {
+        var canvas = document.getElementById("webGLcanvas");
+
+        canvas.width = window.innerWidth - 20;
+        canvas.height = window.innerHeight - 20;
+
+        // Create the GL viewport
+        initGL(canvas);
+
+        // Load the shaders and buffers into the GPU
+        initShaders();
+        initBuffers();
+
+        // Set the background color to opaque black
+        gl.clearColor(0.83, 0.97, 0.96, 1.0);
+
+        // Render only pixels in front of the others
+        gl.enable(gl.DEPTH_TEST);
+
+        // Render the scene
+        drawScene();
+      }
+    </script>
+  </head>
+
+  <body onload="webGLStart();">
+    <canvas id="webGLcanvas" style="border: none"> </canvas>
+    <footer>
+      Lehigh University &bullet; CSE 313 Computer Graphics &bullet; Fall 2022
+    </footer>
+  </body>
+</html>
