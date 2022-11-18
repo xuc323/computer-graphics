@@ -28,7 +28,8 @@ function drawScene() {
   gl.useProgram(currentProgram);
 
   // set ambient light
-  gl.uniform1i(currentProgram.useLightingUniform, true);
+  let specularLighting = document.getElementById("specularityCheck").checked;
+  gl.uniform1i(currentProgram.useSpecularUniform, specularLighting);
   gl.uniform3fv(
     currentProgram.ambientColorUniform,
     getHTMLObject("ambientColorR", "ambientColorG", "ambientColorB")

@@ -171,7 +171,7 @@ function createProgram(vertexShaderID, fragmentShaderID) {
   program.mvMatrixUniform = gl.getUniformLocation(program, "uMVMatrix");
   program.nMatrixUniform = gl.getUniformLocation(program, "uNMatrix");
   program.samplerUniform = gl.getUniformLocation(program, "uSampler");
-  program.useLightingUniform = gl.getUniformLocation(program, "uUseLighting");
+  program.useSpecularUniform = gl.getUniformLocation(program, "uUseSpecular");
   program.ambientColorUniform = gl.getUniformLocation(program, "uAmbientColor");
   program.lightingDirectionUniform = gl.getUniformLocation(
     program,
