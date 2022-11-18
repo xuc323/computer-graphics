@@ -33,7 +33,7 @@ function initBuffers() {
     // item size is always 3 (3d vector describing position)
     sphereBuffer.positionBuffer.itemSize = 3;
     // numItems is the number of vertices in the triangle (2 * (slices + 1) * stacks)
-    sphereBuffer.positionBuffer.numItems = 6 * (slices + 1) * stacks;
+    sphereBuffer.positionBuffer.numItems = 6 * slices * stacks;
 
     // texture coordinates
     sphereBuffer.textureCoordBuffer = gl.createBuffer();
@@ -44,7 +44,7 @@ function initBuffers() {
         gl.STATIC_DRAW
     );
     sphereBuffer.textureCoordBuffer.itemSize = 2;
-    sphereBuffer.textureCoordBuffer.numItems = 6 * (slices + 1) * stacks;
+    sphereBuffer.textureCoordBuffer.numItems = 6 * slices * stacks;
 
     // normals
     sphereBuffer.normBuffer = gl.createBuffer();
@@ -55,7 +55,7 @@ function initBuffers() {
         gl.STATIC_DRAW
     );
     sphereBuffer.normBuffer.itemSize = 3;
-    sphereBuffer.normBuffer.numItems = 6 * (slices + 1) * stacks;
+    sphereBuffer.normBuffer.numItems = 6 * slices * stacks;
     gl.bindBuffer(gl.ARRAY_BUFFER, null);
     /*************************
      * END SPHERE BUFFER
@@ -70,7 +70,7 @@ function initTexture() {
     sphereBuffer.texture.image.onload = function () {
         handleLoadedTexture(sphereBuffer.texture);
     };
-    sphereBuffer.texture.image.src = "../assets/neptune.gif";
+    sphereBuffer.texture.image.src = "../assets/uranus.gif";
 }
 
 // Initialize shader programs

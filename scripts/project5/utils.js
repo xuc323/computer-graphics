@@ -48,153 +48,71 @@ function getShader(gl, id) {
 function createSphere(radius, slices, stacks) {
     let vertices = [], // vertex positions
         normals = [], // vertex normals
-        textureCoords = [], // texture coordinates
-        normalCoords = [], // normal coordinates
-        lookupTable = {}; // lookup table for vertex indices (key: [x, y, z], value: [normals at each vertex])
+        textureCoords = []; // texture coordinates
 
     for (let t = 0; t < stacks; t++) {
         const phi1 = (t / stacks) * Math.PI;
         const phi2 = ((t + 1) / stacks) * Math.PI;
-        for (let p = 0; p < slices + 1; p++) {
+        for (let p = 0; p < slices; p++) {
             const theta1 = (p / slices) * 2 * Math.PI;
             const theta2 = ((p + 1) / slices) * 2 * Math.PI;
 
             // first triangle
-            let xMean = 0,
-                yMean = 0,
-                zMean = 0;
             // first vertex
-            let xVal1 = radius * Math.cos(theta1) * Math.sin(phi1);
-            let yVal1 = radius * Math.sin(theta1) * Math.sin(phi1);
-            let zVal1 = radius * Math.cos(phi1);
-            vertices = vertices.concat([xVal1, yVal1, zVal1]);
-            xMean += xVal1;
-            yMean += yVal1;
-            zMean += zVal1;
+            let xVal = radius * Math.cos(theta1) * Math.sin(phi1);
+            let yVal = radius * Math.sin(theta1) * Math.sin(phi1);
+            let zVal = radius * Math.cos(phi1);
+            vertices = vertices.concat([xVal, yVal, zVal]);
+            let normal = Math.sqrt(xVal * xVal + yVal * yVal + zVal * zVal);
+            normals = normals.concat([xVal / normal, yVal / normal, zVal / normal]);
 
             // second vertex
-            let xVal2 = radius * Math.cos(theta1) * Math.sin(phi2);
-            let yVal2 = radius * Math.sin(theta1) * Math.sin(phi2);
-            let zVal2 = radius * Math.cos(phi2);
-            vertices = vertices.concat([xVal2, yVal2, zVal2]);
-            xMean += xVal2;
-            yMean += yVal2;
-            zMean += zVal2;
+            xVal = radius * Math.cos(theta1) * Math.sin(phi2);
+            yVal = radius * Math.sin(theta1) * Math.sin(phi2);
+            zVal = radius * Math.cos(phi2);
+            vertices = vertices.concat([xVal, yVal, zVal]);
+            normal = Math.sqrt(xVal * xVal + yVal * yVal + zVal * zVal);
+            normals = normals.concat([xVal / normal, yVal / normal, zVal / normal]);
 
             // third vertex
-            let xVal3 = radius * Math.cos(theta2) * Math.sin(phi1);
-            let yVal3 = radius * Math.sin(theta2) * Math.sin(phi1);
-            let zVal3 = radius * Math.cos(phi1);
-            vertices = vertices.concat([xVal3, yVal3, zVal3]);
-            xMean += xVal3;
-            yMean += yVal3;
-            zMean += zVal3;
-
-            // calculate the normal
-            xMean /= 3;
-            yMean /= 3;
-            zMean /= 3;
-            let normal = Math.sqrt(
-                xMean * xMean + yMean * yMean + zMean * zMean
-            );
-
-            // push the vertex to normal coordinates
-            normalCoords.push([xVal1, yVal1, zVal1]);
-            normalCoords.push([xVal2, yVal2, zVal2]);
-            normalCoords.push([xVal3, yVal3, zVal3]);
-
-            // push the normal for each vertex to lookup table
-            if (lookupTable[[xVal1, yVal1, zVal1]] === undefined) {
-                lookupTable[[xVal1, yVal1, zVal1]] = [];
-            }
-            lookupTable[[xVal1, yVal1, zVal1]].push([xMean / normal, yMean / normal, zMean / normal]);
-            if (lookupTable[[xVal2, yVal2, zVal2]] === undefined) {
-                lookupTable[[xVal2, yVal2, zVal2]] = [];
-            }
-            lookupTable[[xVal2, yVal2, zVal2]].push([xMean / normal, yMean / normal, zMean / normal]);
-            if (lookupTable[[xVal3, yVal3, zVal3]] === undefined) {
-                lookupTable[[xVal3, yVal3, zVal3]] = [];
-            }
-            lookupTable[[xVal3, yVal3, zVal3]].push([xMean / normal, yMean / normal, zMean / normal]);
+            xVal = radius * Math.cos(theta2) * Math.sin(phi1);
+            yVal = radius * Math.sin(theta2) * Math.sin(phi1);
+            zVal = radius * Math.cos(phi1);
+            vertices = vertices.concat([xVal, yVal, zVal]);
+            normal = Math.sqrt(xVal * xVal + yVal * yVal + zVal * zVal);
+            normals = normals.concat([xVal / normal, yVal / normal, zVal / normal]);
 
             // second triangle
-            xMean = 0;
-            yMean = 0;
-            zMean = 0;
             // first vertex
-            xVal1 = radius * Math.cos(theta2) * Math.sin(phi1);
-            yVal1 = radius * Math.sin(theta2) * Math.sin(phi1);
-            zVal1 = radius * Math.cos(phi1);
-            vertices = vertices.concat([xVal1, yVal1, zVal1]);
-            xMean += xVal1;
-            yMean += yVal1;
-            zMean += zVal1;
+            xVal = radius * Math.cos(theta2) * Math.sin(phi1);
+            yVal = radius * Math.sin(theta2) * Math.sin(phi1);
+            zVal = radius * Math.cos(phi1);
+            vertices = vertices.concat([xVal, yVal, zVal]);
+            normal = Math.sqrt(xVal * xVal + yVal * yVal + zVal * zVal);
+            normals = normals.concat([xVal / normal, yVal / normal, zVal / normal]);
 
             // second vertex
-            xVal2 = radius * Math.cos(theta1) * Math.sin(phi2);
-            yVal2 = radius * Math.sin(theta1) * Math.sin(phi2);
-            zVal2 = radius * Math.cos(phi2);
-            vertices = vertices.concat([xVal2, yVal2, zVal2]);
-            xMean += xVal2;
-            yMean += yVal2;
-            zMean += zVal2;
+            xVal = radius * Math.cos(theta1) * Math.sin(phi2);
+            yVal = radius * Math.sin(theta1) * Math.sin(phi2);
+            zVal = radius * Math.cos(phi2);
+            vertices = vertices.concat([xVal, yVal, zVal]);
+            normal = Math.sqrt(xVal * xVal + yVal * yVal + zVal * zVal);
+            normals = normals.concat([xVal / normal, yVal / normal, zVal / normal]);
 
-            xVal3 = radius * Math.cos(theta2) * Math.sin(phi2);
-            yVal3 = radius * Math.sin(theta2) * Math.sin(phi2);
-            zVal3 = radius * Math.cos(phi2);
-            vertices = vertices.concat([xVal3, yVal3, zVal3]);
-            xMean += xVal3;
-            yMean += yVal3;
-            zMean += zVal3;
-
-            // calculate the normal
-            xMean /= 3;
-            yMean /= 3;
-            zMean /= 3;
-            normal = Math.sqrt(xMean * xMean + yMean * yMean + zMean * zMean);
-
-            // push the vertex to normal coordinates
-            normalCoords.push([xVal1, yVal1, zVal1]);
-            normalCoords.push([xVal2, yVal2, zVal2]);
-            normalCoords.push([xVal3, yVal3, zVal3]);
-
-            // push the normal for each vertex to lookup table
-            if (lookupTable[[xVal1, yVal1, zVal1]] === undefined) {
-                lookupTable[[xVal1, yVal1, zVal1]] = [];
-            }
-            lookupTable[[xVal1, yVal1, zVal1]].push([xMean / normal, yMean / normal, zMean / normal]);
-            if (lookupTable[[xVal2, yVal2, zVal2]] === undefined) {
-                lookupTable[[xVal2, yVal2, zVal2]] = [];
-            }
-            lookupTable[[xVal2, yVal2, zVal2]].push([xMean / normal, yMean / normal, zMean / normal]);
-            if (lookupTable[[xVal3, yVal3, zVal3]] === undefined) {
-                lookupTable[[xVal3, yVal3, zVal3]] = [];
-            }
-            lookupTable[[xVal3, yVal3, zVal3]].push([xMean / normal, yMean / normal, zMean / normal]);
+            xVal = radius * Math.cos(theta2) * Math.sin(phi2);
+            yVal = radius * Math.sin(theta2) * Math.sin(phi2);
+            zVal = radius * Math.cos(phi2);
+            vertices = vertices.concat([xVal, yVal, zVal]);
+            normal = Math.sqrt(xVal * xVal + yVal * yVal + zVal * zVal);
+            normals = normals.concat([xVal / normal, yVal / normal, zVal / normal]);
         }
-    }
-
-    // calculate the average normal for each vertex
-    for (let i = 0; i < normalCoords.length; i++) {
-        let xMean = 0,
-            yMean = 0,
-            zMean = 0;
-        for (let j = 0; j < lookupTable[normalCoords[i]].length; j++) {
-            xMean += lookupTable[normalCoords[i]][j][0];
-            yMean += lookupTable[normalCoords[i]][j][1];
-            zMean += lookupTable[normalCoords[i]][j][2];
-        }
-        xMean /= lookupTable[normalCoords[i]].length;
-        yMean /= lookupTable[normalCoords[i]].length;
-        zMean /= lookupTable[normalCoords[i]].length;
-        normals = normals.concat([xMean, yMean, zMean]);
     }
 
     // texture coordinates
     for (t = 0; t < stacks; t++) {
         const phi1 = t / stacks;
         const phi2 = (t + 1) / stacks;
-        for (p = 0; p < slices + 1; p++) {
+        for (p = 0; p < slices; p++) {
             const theta1 = 1 - p / slices;
             const theta2 = 1 - (p + 1) / slices;
 
