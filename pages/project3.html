@@ -60,13 +60,13 @@
       // Compile and return the shader program
       function getShader(gl, id) {
         // Load the shader code by it's ID, as assigned in the script element (e.g. "shader-fs" or "shader-vs")
-        var shaderScript = document.getElementById(id);
+        const shaderScript = document.getElementById(id);
         if (!shaderScript) {
           return null;
         }
 
-        var k = shaderScript.firstChild;
-        var str = "";
+        let k = shaderScript.firstChild;
+        let str = "";
         // While firstChild exists
         while (k) {
           // If the firstChild is a TEXT type document
@@ -77,7 +77,7 @@
           k = k.nextSibling;
         }
 
-        var shader;
+        let shader;
         if (shaderScript.type == "x-shader/x-fragment") {
           shader = gl.createShader(gl.FRAGMENT_SHADER);
         } else if (shaderScript.type == "x-shader/x-vertex") {
@@ -105,8 +105,8 @@
       // Initialize shader programs
       var shaderProgram;
       function initShaders() {
-        var fragmentShader = getShader(gl, "shader-fs");
-        var vertexShader = getShader(gl, "shader-vs");
+        const fragmentShader = getShader(gl, "shader-fs");
+        const vertexShader = getShader(gl, "shader-vs");
 
         // Create the program, then attach and link
         shaderProgram = gl.createProgram();
@@ -177,7 +177,7 @@
         // positions
         squarePositionBuffer = gl.createBuffer();
         gl.bindBuffer(gl.ARRAY_BUFFER, squarePositionBuffer);
-        var vertices = [
+        let vertices = [
           squarePositiveSideX,
           squareNegativeSideY,
           0.0,
@@ -214,7 +214,7 @@
         // color
         squareColorBuffer = gl.createBuffer();
         gl.bindBuffer(gl.ARRAY_BUFFER, squareColorBuffer);
-        var colors = [
+        let colors = [
           0.0, 1.0, 0.0, 1, 0.0, 1.0, 0.0, 1, 0.0, 1.0, 0.0, 1, 0.0, 1.0, 0.0,
           1, 0.0, 1.0, 0.0, 1, 0.0, 1.0, 0.0, 1, 0.0, 1.0, 0.0, 1, 0.0, 1.0,
           0.0, 1,
@@ -236,19 +236,19 @@
         // positions
         spherePositionBuffer = gl.createBuffer();
         gl.bindBuffer(gl.ARRAY_BUFFER, spherePositionBuffer);
-        var radius = 0.5,
+        let radius = 0.5,
           slices = 25,
           stacks = 12,
           count = 0;
         vertices = []; // reset vertices to empty
-        for (var t = 0; t < stacks; t++) {
-          var phi1 = (t / stacks) * Math.PI;
-          var phi2 = ((t + 1) / stacks) * Math.PI;
-          for (var p = 0; p < slices + 1; p++) {
-            var theta = (p / slices) * 2 * Math.PI;
-            var xVal = radius * Math.cos(theta) * Math.sin(phi1);
-            var yVal = radius * Math.sin(theta) * Math.sin(phi1);
-            var zVal = radius * Math.cos(phi1);
+        for (let t = 0; t < stacks; t++) {
+          const phi1 = (t / stacks) * Math.PI;
+          const phi2 = ((t + 1) / stacks) * Math.PI;
+          for (let p = 0; p < slices + 1; p++) {
+            const theta = (p / slices) * 2 * Math.PI;
+            let xVal = radius * Math.cos(theta) * Math.sin(phi1);
+            let yVal = radius * Math.sin(theta) * Math.sin(phi1);
+            let zVal = radius * Math.cos(phi1);
             vertices = vertices.concat([xVal, yVal, zVal]);
             count++;
             xVal = radius * Math.cos(theta) * Math.sin(phi2);
@@ -272,7 +272,7 @@
         sphereColorBuffer = gl.createBuffer();
         gl.bindBuffer(gl.ARRAY_BUFFER, sphereColorBuffer);
         colors = [];
-        for (var i = 0; i < count / 3; i++) {
+        for (let i = 0; i < count / 3; i++) {
           colors = colors.concat([
             1.0, 1.0, 0.0, 1, 0.0, 1.0, 1.0, 1, 1.0, 0.0, 1.0, 1,
           ]);
@@ -346,7 +346,7 @@
 
         // positions
         gl.bindBuffer(gl.ARRAY_BUFFER, squarePositionBuffer);
-        vertices = [
+        const vertices = [
           squarePositiveSideX,
           squareNegativeSideY,
           0.0,
@@ -409,8 +409,8 @@
          *************************/
         mat4.identity(mvMatrix);
         mat4.translate(mvMatrix, mvMatrix, [
-          spherePositionX + squarePositionX,
-          spherePositionY + squarePositionY,
+          spherePositionX,
+          spherePositionY,
           -30.0,
         ]);
 
@@ -500,9 +500,9 @@
       // Hanldes resize of the canvas
       function resize(canvas) {
         // browser width
-        var dispWidth = window.innerWidth - 20;
+        const dispWidth = window.innerWidth - 20;
         // browser height
-        var dispHeight = window.innerHeight - 20;
+        const dispHeight = window.innerHeight - 20;
 
         // check if the canvas is not the same size
         if (canvas.width != dispWidth || canvas.height != dispHeight) {
@@ -522,26 +522,30 @@
       var sphereXspeed = Math.random() * 30,
         sphereYspeed = Math.random() * 30;
       function animate() {
-        var timeNow = new Date().getTime();
+        const timeNow = new Date().getTime();
         if (lastTime != 0) {
-          var elapsed = timeNow - lastTime;
+          const elapsed = timeNow - lastTime;
           // update the movement of the sphere
-          var tempX = spherePositionX + (sphereXspeed * elapsed) / 1000.0;
-          if (tempX >= squarePositiveSideX) {
-            tempX = squarePositiveSideX - (tempX - squarePositiveSideX);
+          let tempX = spherePositionX + (sphereXspeed * elapsed) / 1000.0;
+          let posBound = squarePositiveSideX + squarePositionX,
+            negBound = squareNegativeSideX + squarePositionX;
+          if (tempX >= posBound) {
+            tempX = posBound - (tempX - posBound);
             sphereXspeed = -sphereXspeed;
-          } else if (tempX <= squareNegativeSideX) {
-            tempX = squareNegativeSideX - (tempX - squareNegativeSideX);
+          } else if (tempX <= negBound) {
+            tempX = negBound - (tempX - negBound);
             sphereXspeed = -sphereXspeed;
           }
           spherePositionX = tempX;
 
-          var tempY = spherePositionY + (sphereYspeed * elapsed) / 1000.0;
-          if (tempY >= squarePositiveSideY) {
-            tempY = squarePositiveSideY - (tempY - squarePositiveSideY);
+          let tempY = spherePositionY + (sphereYspeed * elapsed) / 1000.0;
+          posBound = squarePositiveSideY + squarePositionY;
+          negBound = squareNegativeSideY + squarePositionY;
+          if (tempY >= posBound) {
+            tempY = posBound - (tempY - posBound);
             sphereYspeed = -sphereYspeed;
-          } else if (tempY <= squareNegativeSideY) {
-            tempY = squareNegativeSideY - (tempY - squareNegativeSideY);
+          } else if (tempY <= negBound) {
+            tempY = negBound - (tempY - negBound);
             sphereYspeed = -sphereYspeed;
           }
           spherePositionY = tempY;
@@ -569,35 +573,18 @@
         // left arrow
         if (currentlyPressedKeys[37]) {
           squarePositionX -= 0.1;
-          // squarePositiveSideX -= 0.1;
-          // squareNegativeSideX -= 0.1;
         }
         // right arrow
         if (currentlyPressedKeys[39]) {
           squarePositionX += 0.1;
-          // squarePositiveSideX += 0.1;
-          // squareNegativeSideX += 0.1;
         }
         // down arrow
         if (currentlyPressedKeys[40]) {
           squarePositionY -= 0.1;
-          // squarePositiveSideY -= 0.1;
-          // squareNegativeSideY -= 0.1;
         }
         // up arrow
         if (currentlyPressedKeys[38]) {
           squarePositionY += 0.1;
-          // squarePositiveSideY += 0.1;
-          // squareNegativeSideY += 0.1;
-        }
-        // r button (Reset)
-        if (currentlyPressedKeys[82]) {
-          squarePositionX = 0.0;
-          squarePositiveSideX = 5.0;
-          squareNegativeSideX = -5.0;
-          squarePositionY = 0;
-          squarePositiveSideY = 5.0;
-          squareNegativeSideY = -5.0;
         }
       }
     </script>
