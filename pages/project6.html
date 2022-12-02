@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CSE 313 Project 6</title>
+    <!-- Fragment shader for gouraud shading-->
+    <script id="shader-fs" type="x-shader/x-fragment">
+      // sets the precision of vColor
+      precision mediump float;
+
+      // input texture coordinate
+      // webGL figures out the interpolated coordinates along the texture
+      varying vec2 vTextureCoord;
+      varying vec3 vLightWeighting;
+
+      // a sampler is shader's representation of the texture
+      uniform sampler2D uSampler;
+
+      void main(void) {
+        // texture2D gets the appropriate pixel color from the texture
+        vec4 textureColor = texture2D(uSampler, vec2(vTextureCoord.s, vTextureCoord.t));
+        // here we incorporate the lighting equation
+        gl_FragColor = vec4(textureColor.rgb * vLightWeighting, textureColor.a);
+      }
+    </script>
+    <!-- Fragment shader for gouraud shading-->
+    <!-- Vertex shader for gouraud shading-->
+    <script id="shader-vs" type="x-shader/x-vertex">
+      // Attributes are inputs provided for each vertex,
+      // different for each vertex in the rendering call input: vertex position
+      attribute vec3 aVertexPosition; // vertex coordinates
+
+      // vertex texture
+      attribute vec2 aTextureCoord; // texture coordinates
+      varying vec2 vTextureCoord; // output texture coordinates
+
+      // normals
+      attribute vec3 aVertexNormal; // vertex normals
+
+      // Uniforms are inputs provided for ALL vertices,
+      // the same for all vertices in any rendering call
+      uniform mat4 uMVMatrix; // model-view matrix
+      uniform mat4 uPMatrix; // perspective matrix
+      uniform mat3 uNMatrix; // normal matrix
+
+      // light
+      uniform vec3 uAmbientColor; // ambient light color
+      uniform vec3 uLightingDirection; // light direction
+      uniform vec3 uDirectionalColor; // directional light color
+      uniform bool uUseSpecular; // use specular lighting on or off
+      varying vec3 vLightWeighting; // output light weight
+
+      // pass through the texture coordinates from aTextureCoord to vTextureCoord
+      // the varying variable is the output
+      void main(void) {
+        gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
+
+        // pass vertex color to fragment shader
+        vTextureCoord = aTextureCoord;
+
+        // calculate transformed vertex normal vector
+        vec3 transformedNormal = uNMatrix * aVertexNormal;
+
+        // determine the vector of incoming light
+        float directionalLightWeighting = max(dot(normalize(transformedNormal), normalize(uLightingDirection)), 0.0);
+
+        // specularity only gets calculated when selected
+        float spec = 0.0;
+
+        // if specular lighting, modify variable spec
+        if (uUseSpecular) {
+          // measure the reflection angle of the light
+          vec3 reflection = reflect(normalize(uLightingDirection), normalize(transformedNormal));
+          // get the reflection angle to the camera
+          vec3 p = (uMVMatrix * vec4(aVertexPosition, 1.0)).xyz;
+          // measure the angle
+          float dotProd = dot(normalize(reflection), normalize(p));
+          // calculate specularity
+          spec = 1.0 * 1.0 * pow(max(dotProd, 0.0), 100.0);
+        }
+
+        // calculate the light weight and pass to fragment shader
+        vLightWeighting = uAmbientColor + normalize(uDirectionalColor) * directionalLightWeighting + spec;
+      }
+    </script>
+    <!-- Vertex shader for gouraud shading-->
+    <!-- Fragment shader for phong shading-->
+    <script id="perfrag-shader-fs" type="x-shader/x-fragment">
+      // sets the precision of vColor
+      precision mediump float;
+
+      // input texture coordinate
+      // webGL figures out the interpolated coordinates along the texture
+      varying vec2 vTextureCoord;
+
+      // a sampler is shader's representation of the texture
+      uniform sampler2D uSampler;
+
+      // light
+      uniform vec3 uAmbientColor; // ambient light color
+      uniform vec3 uLightingDirection; // light direction
+      uniform vec3 uDirectionalColor; // directional light color
+      uniform bool uUseSpecular; // use specular lighting on or off
+
+      varying vec3 vPosition; // per-fragment position
+      varying vec3 vTransformedNormal; // per-fragment normal
+
+      void main(void) {
+        // texture2D gets the appropriate pixel color from the texture
+        vec4 textureColor = texture2D(uSampler, vec2(vTextureCoord.s, vTextureCoord.t));
+
+        // determine the vector of incoming light
+        float directionalLightWeighting = max(dot(normalize(vTransformedNormal), normalize(uLightingDirection)), 0.0);
+
+        // specularity only gets calculated when selected
+        float specularWeight = 0.0;
+
+        // if specular lighting, modify variable specularWeight
+        if(uUseSpecular){
+          // measure the reflection angle of the light
+          vec3 reflection = reflect(normalize(uLightingDirection), normalize(vTransformedNormal));
+          // calculate specularity
+          specularWeight = pow(max(dot(normalize(reflection), normalize(vPosition)), 0.0), 100.0);
+        }
+
+        // calculate the light weight
+        float specularColor = 1.0 * 1.0;
+        vec3 lightWeighting = uAmbientColor + normalize(uDirectionalColor) * directionalLightWeighting + specularColor * specularWeight;
+
+        // here we incorporate the lighting equation
+        gl_FragColor = vec4(textureColor.rgb * lightWeighting, textureColor.a);
+      }
+    </script>
+    <!-- Fragment shader for phong shading-->
+    <!-- Vertex shader for phong shading-->
+    <script id="perfrag-shader-vs" type="x-shader/x-vertex">
+      // Attributes are inputs provided for each vertex,
+      // different for each vertex in the rendering call input: vertex position
+      attribute vec3 aVertexPosition; // vertex coordinates
+      varying vec3 vPosition; // per-fragment position
+
+      // vertex texture
+      attribute vec2 aTextureCoord; // texture coordinates
+      varying vec2 vTextureCoord; // output texture coordinates
+
+      // normals
+      attribute vec3 aVertexNormal; // vertex normals
+      varying vec3 vTransformedNormal; // transformed normals
+
+      // Uniforms are inputs provided for ALL vertices,
+      // the same for all vertices in any rendering call
+      uniform mat4 uMVMatrix; // model-view matrix
+      uniform mat4 uPMatrix; // perspective matrix
+      uniform mat3 uNMatrix; // normal matrix
+
+      void main(void) {
+        gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
+
+        // calculate and pass position data to fragment shader
+        vPosition = (uMVMatrix * vec4(aVertexPosition, 1.0)).xyz;
+
+        // pass vertex color to fragment shader
+        vTextureCoord = aTextureCoord;
+
+        // pass transformed normal to fragment shader
+        vTransformedNormal = uNMatrix * aVertexNormal;
+      }
+    </script>
+    <!-- Vertex shader for phong shading-->
+    <script type="text/javascript" src="../lib/gl-matrix-2.7.0.min.js"></script>
+    <script type="text/javascript" src="../lib/webgl-utils.js"></script>
+    <script type="text/javascript" src="../lib/plyParser-byc02.js"></script>
+    <script type="text/javascript">
+      // Initialize GL
+      var gl;
+      function initGL(canvas) {
+        try {
+          gl = canvas.getContext("experimental-webgl");
+          gl.viewportWidth = canvas.width;
+          gl.viewportHeight = canvas.height;
+        } catch (e) {}
+        if (!gl) {
+          alert("Could not initialize WebGL");
+        }
+      }
+
+      var canvas;
+      function webGLStart() {
+        canvas = document.getElementById("webGLcanvas");
+
+        canvas.width = window.innerWidth - 20;
+        canvas.height = window.innerHeight - 20;
+
+        // Create the GL viewport
+        initGL(canvas);
+
+        // Load the shaders and buffers into the GPU
+        initShaders();
+        initBuffers();
+        initTexture();
+
+        // Set the background color to opaque black
+        gl.clearColor(0.0, 0.0, 0.0, 1.0);
+
+        // handle mouse inputs with callbacks
+        canvas.onmousedown = handleMouseDown;
+        document.onmouseup = handleMouseUp;
+        document.onmousemove = handleMouseMove;
+
+        // Render only pixels in front of the others
+        gl.enable(gl.DEPTH_TEST);
+
+        // Render the scene
+        tick();
+      }
+    </script>
+    <script type="text/javascript" src="../scripts/project6/init.js"></script>
+    <script type="text/javascript" src="../scripts/project6/draw.js"></script>
+    <script type="text/javascript" src="../scripts/project6/utils.js"></script>
+  </head>
+  <body onload="webGLStart();">
+    <canvas id="webGLcanvas" style="border: none"> </canvas>
+    <div class="inputs"></div>
+    <footer>
+      <p style="text-align: center; margin: 0">
+        Lehigh University &bullet; CSE 313 Computer Graphics &bullet; Fall 2022
+      </p>
+    </footer>
+  </body>
+</html>
