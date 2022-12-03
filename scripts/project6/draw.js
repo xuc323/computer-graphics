@@ -17,9 +17,83 @@ function drawScene() {
     100.0
   );
 
+  gl.useProgram(pointLightProgram);
+
+  /********************************
+   * START DRAWING RED SPHERE
+   ********************************/
+  mat4.identity(mvMatrix);
+  mat4.translate(mvMatrix, mvMatrix, [0.0, 2.0, -20.0]);
+  mat4.multiply(mvMatrix, mvMatrix, mouseRotMatrix);
+
+  // positions
+  gl.bindBuffer(gl.ARRAY_BUFFER, redSphereBuffer.positionBuffer);
+  gl.vertexAttribPointer(
+    pointLightProgram.vertexPositionAttribute,
+    redSphereBuffer.positionBuffer.itemSize,
+    gl.FLOAT,
+    false,
+    0,
+    0
+  );
+
+  // colors
+  gl.bindBuffer(gl.ARRAY_BUFFER, redSphereBuffer.colorBuffer);
+  gl.vertexAttribPointer(
+    pointLightProgram.vertexColorAttribute,
+    redSphereBuffer.colorBuffer.itemSize,
+    gl.FLOAT,
+    false,
+    0,
+    0
+  );
+
+  setMatrixUniforms(1);
+  gl.drawArrays(gl.TRIANGLES, 0, redSphereBuffer.positionBuffer.numItems);
+  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
+  /********************************
+   * END DRAWING RED SPHERE
+   ********************************/
+  /********************************
+   * START DRAWING BLUE SPHERE
+   ********************************/
+  mat4.identity(mvMatrix);
+  mat4.translate(mvMatrix, mvMatrix, [0.0, -2.0, -20.0]);
+  mat4.multiply(mvMatrix, mvMatrix, mouseRotMatrix);
+
+  // positions
+  gl.bindBuffer(gl.ARRAY_BUFFER, blueSphereBuffer.positionBuffer);
+  gl.vertexAttribPointer(
+    pointLightProgram.vertexPositionAttribute,
+    blueSphereBuffer.positionBuffer.itemSize,
+    gl.FLOAT,
+    false,
+    0,
+    0
+  );
+
+  // colors
+  gl.bindBuffer(gl.ARRAY_BUFFER, blueSphereBuffer.colorBuffer);
+  gl.vertexAttribPointer(
+    pointLightProgram.vertexColorAttribute,
+    blueSphereBuffer.colorBuffer.itemSize,
+    gl.FLOAT,
+    false,
+    0,
+    0
+  );
+
+  setMatrixUniforms(1);
+  gl.drawArrays(gl.TRIANGLES, 0, blueSphereBuffer.positionBuffer.numItems);
+  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
+  /********************************
+   * END DRAWING BLUE SPHERE
+   ********************************/
+
+  gl.useProgram(shaderProgram);
   // set ambient light
   gl.uniform1i(shaderProgram.useSpecularUniform, true);
-  gl.uniform3fv(shaderProgram.ambientColorUniform, [0.5, 0.5, 0.5]);
+  gl.uniform3fv(shaderProgram.ambientColorUniform, [0.35, 0.35, 0.35]);
 
   // set directional light
   vec3.normalize(directionalMatrix, [1.0, 1.0, 0.0]);
@@ -73,7 +147,7 @@ function drawScene() {
     gl.bindTexture(gl.TEXTURE_2D, bunneyBuffer.texture);
     gl.uniform1i(shaderProgram.samplerUniform, 0);
     // set uniform variable in vertex shader
-    setMatrixUniforms();
+    setMatrixUniforms(2);
     // draw triangles
     gl.drawArrays(gl.TRIANGLES, 0, bunneyBuffer.positionBuffer.numItems);
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);
@@ -128,7 +202,7 @@ function drawScene() {
     gl.bindTexture(gl.TEXTURE_2D, buddhaBuffer.texture);
     gl.uniform1i(shaderProgram.samplerUniform, 0);
     // set uniform variable in vertex shader
-    setMatrixUniforms();
+    setMatrixUniforms(2);
     // draw triangles
     gl.drawArrays(gl.TRIANGLES, 0, buddhaBuffer.positionBuffer.numItems);
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, null);

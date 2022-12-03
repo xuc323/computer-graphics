@@ -32,45 +32,56 @@ var buddhaBuffer = {
 // We will generate the geometry with this function
 function initBuffers() {
   /*************************
-   * START SPHERE BUFFER
+   * START RED SPHERE BUFFER
    *************************/
   // Create a buffer for the sun's vertices.
-  let radius = 1.8,
-    slices = 12,
-    stacks = 6;
-  let { vertices, normals, textureCoords } = createSphere(
-    radius,
-    slices,
-    stacks
-  );
+  let radius = 1.0,
+    slices = 25,
+    stacks = 12;
+  // positions
+  let { vertices } = createSphere(radius, slices, stacks);
+  redSphereBuffer.positionBuffer = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, redSphereBuffer.positionBuffer);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
+  // item size is always 3 (3d vector describing position)
+  redSphereBuffer.positionBuffer.itemSize = 3;
+  // numItems is the number of vertices in the triangle (6 * (slices) * stacks)
+  redSphereBuffer.positionBuffer.numItems = 6 * slices * stacks;
+  gl.bindBuffer(gl.ARRAY_BUFFER, null);
+
+  // colors
+  let colors = createColorArray(vertices.length, "r");
+  redSphereBuffer.colorBuffer = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, redSphereBuffer.colorBuffer);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.STATIC_DRAW);
+  redSphereBuffer.colorBuffer.itemSize = 4;
+  redSphereBuffer.colorBuffer.numItems = 6 * slices * stacks;
+  gl.bindBuffer(gl.ARRAY_BUFFER, null);
+  /*************************
+   * END RED SPHERE BUFFER
+   *************************/
+  /***************************
+   * START BLUE SPHERE BUFFER
+   ***************************/
   // positions
   blueSphereBuffer.positionBuffer = gl.createBuffer();
   gl.bindBuffer(gl.ARRAY_BUFFER, blueSphereBuffer.positionBuffer);
   gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
-  // item size is always 3 (3d vector describing position)
   blueSphereBuffer.positionBuffer.itemSize = 3;
-  // numItems is the number of vertices in the triangle (6 * (slices) * stacks)
   blueSphereBuffer.positionBuffer.numItems = 6 * slices * stacks;
-  // texture coordinates
-  blueSphereBuffer.textureCoordBuffer = gl.createBuffer();
-  gl.bindBuffer(gl.ARRAY_BUFFER, blueSphereBuffer.textureCoordBuffer);
-  gl.bufferData(
-    gl.ARRAY_BUFFER,
-    new Float32Array(textureCoords),
-    gl.STATIC_DRAW
-  );
-  blueSphereBuffer.textureCoordBuffer.itemSize = 2;
-  blueSphereBuffer.textureCoordBuffer.numItems = 6 * slices * stacks;
-  // normals
-  blueSphereBuffer.normalBuffer = gl.createBuffer();
-  gl.bindBuffer(gl.ARRAY_BUFFER, blueSphereBuffer.normalBuffer);
-  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(normals), gl.STATIC_DRAW);
-  blueSphereBuffer.normalBuffer.itemSize = 3;
-  blueSphereBuffer.normalBuffer.numItems = 6 * slices * stacks;
   gl.bindBuffer(gl.ARRAY_BUFFER, null);
-  /*************************
-   * END SPHERE BUFFER
-   *************************/
+
+  // colors
+  colors = createColorArray(vertices.length, "b");
+  blueSphereBuffer.colorBuffer = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, blueSphereBuffer.colorBuffer);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(colors), gl.STATIC_DRAW);
+  blueSphereBuffer.colorBuffer.itemSize = 4;
+  blueSphereBuffer.colorBuffer.numItems = 6 * slices * stacks;
+  gl.bindBuffer(gl.ARRAY_BUFFER, null);
+  /***************************
+   * END BLUE SPHERE BUFFER
+   ***************************/
 }
 
 function initPLY() {
@@ -130,8 +141,8 @@ function initTexture() {
 }
 
 // Initialize shader programs
-var shaderProgram;
+var shaderProgram, pointLightProgram;
 function initShaders() {
-  shaderProgram = createProgram("perfrag-shader-vs", "perfrag-shader-fs");
-  gl.useProgram(shaderProgram);
+  pointLightProgram = createProgram("shader-vs", "shader-fs", 1);
+  shaderProgram = createProgram("perfrag-shader-vs", "perfrag-shader-fs", 2);
 }

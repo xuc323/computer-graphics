@@ -130,7 +130,26 @@ function createSphere(radius, slices, stacks) {
   return { vertices, normals, textureCoords };
 }
 
-function createProgram(vertexShaderID, fragmentShaderID) {
+function createColorArray(arraySize, color) {
+  let colors = [],
+    c = [];
+
+  if (color == "b") {
+    c = [0.0, 0.0, 1.0, 1];
+  } else if (color == "r") {
+    c = [1.0, 0.0, 0.0, 1];
+  } else {
+    return;
+  }
+
+  for (let i = 0; i < arraySize; i++) {
+    colors = colors.concat(c);
+  }
+
+  return colors;
+}
+
+function createProgram(vertexShaderID, fragmentShaderID, index) {
   const vertexShader = getShader(gl, vertexShaderID);
   const fragmentShader = getShader(gl, fragmentShaderID);
 
@@ -151,36 +170,49 @@ function createProgram(vertexShaderID, fragmentShaderID) {
     "aVertexPosition"
   );
   gl.enableVertexAttribArray(program.vertexPositionAttribute);
-
-  // lighting data
-  program.vertexNormalAttribute = gl.getAttribLocation(
-    program,
-    "aVertexNormal"
-  );
-  gl.enableVertexAttribArray(program.vertexNormalAttribute);
-
-  // texture data
-  program.textureCoordAttribute = gl.getAttribLocation(
-    program,
-    "aTextureCoord"
-  );
-  gl.enableVertexAttribArray(program.textureCoordAttribute);
-
-  // send uniform data to the shaders
+  // shared for both shader programs
   program.pMatrixUniform = gl.getUniformLocation(program, "uPMatrix");
   program.mvMatrixUniform = gl.getUniformLocation(program, "uMVMatrix");
-  program.nMatrixUniform = gl.getUniformLocation(program, "uNMatrix");
-  program.samplerUniform = gl.getUniformLocation(program, "uSampler");
-  program.useSpecularUniform = gl.getUniformLocation(program, "uUseSpecular");
-  program.ambientColorUniform = gl.getUniformLocation(program, "uAmbientColor");
-  program.lightingDirectionUniform = gl.getUniformLocation(
-    program,
-    "uLightingDirection"
-  );
-  program.directionalColorUniform = gl.getUniformLocation(
-    program,
-    "uDirectionalColor"
-  );
+
+  if (index === 2) {
+    // lighting data
+    program.vertexNormalAttribute = gl.getAttribLocation(
+      program,
+      "aVertexNormal"
+    );
+    gl.enableVertexAttribArray(program.vertexNormalAttribute);
+
+    // texture data
+    program.textureCoordAttribute = gl.getAttribLocation(
+      program,
+      "aTextureCoord"
+    );
+    gl.enableVertexAttribArray(program.textureCoordAttribute);
+
+    // send uniform data to the shaders
+    program.nMatrixUniform = gl.getUniformLocation(program, "uNMatrix");
+    program.samplerUniform = gl.getUniformLocation(program, "uSampler");
+    program.useSpecularUniform = gl.getUniformLocation(program, "uUseSpecular");
+    program.ambientColorUniform = gl.getUniformLocation(
+      program,
+      "uAmbientColor"
+    );
+    program.lightingDirectionUniform = gl.getUniformLocation(
+      program,
+      "uLightingDirection"
+    );
+    program.directionalColorUniform = gl.getUniformLocation(
+      program,
+      "uDirectionalColor"
+    );
+  } else {
+    // color data
+    program.vertexColorAttribute = gl.getAttribLocation(
+      program,
+      "aVertexColor"
+    );
+    gl.enableVertexAttribArray(program.vertexColorAttribute);
+  }
 
   return program;
 }
@@ -207,14 +239,19 @@ function resize(canvas) {
 }
 
 // Here we connect the uniform matrices
-function setMatrixUniforms() {
-  gl.uniformMatrix4fv(shaderProgram.pMatrixUniform, false, pMatrix);
-  gl.uniformMatrix4fv(shaderProgram.mvMatrixUniform, false, mvMatrix);
+function setMatrixUniforms(index) {
+  if (index == 1) {
+    gl.uniformMatrix4fv(pointLightProgram.pMatrixUniform, false, pMatrix);
+    gl.uniformMatrix4fv(pointLightProgram.mvMatrixUniform, false, mvMatrix);
+  } else {
+    gl.uniformMatrix4fv(shaderProgram.pMatrixUniform, false, pMatrix);
+    gl.uniformMatrix4fv(shaderProgram.mvMatrixUniform, false, mvMatrix);
 
-  mat3.fromMat4(normalMatrix, mvMatrix);
-  mat3.invert(normalMatrix, normalMatrix);
-  mat3.transpose(normalMatrix, normalMatrix);
-  gl.uniformMatrix3fv(shaderProgram.nMatrixUniform, false, normalMatrix);
+    mat3.fromMat4(normalMatrix, mvMatrix);
+    mat3.invert(normalMatrix, normalMatrix);
+    mat3.transpose(normalMatrix, normalMatrix);
+    gl.uniformMatrix3fv(shaderProgram.nMatrixUniform, false, normalMatrix);
+  }
 }
 
 // reads the texture image and saves it to the variable provided

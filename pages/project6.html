@@ -5,87 +5,45 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>CSE 313 Project 6</title>
-    <!-- Fragment shader for gouraud shading-->
+    <!-- Fragment shader-->
     <script id="shader-fs" type="x-shader/x-fragment">
       // sets the precision of vColor
       precision mediump float;
 
-      // input texture coordinate
-      // webGL figures out the interpolated coordinates along the texture
-      varying vec2 vTextureCoord;
-      varying vec3 vLightWeighting;
-
-      // a sampler is shader's representation of the texture
-      uniform sampler2D uSampler;
+      // The variable labeled varying is input
+      // vColor is interpolated over vertices
+      varying vec4 vColor;
 
       void main(void) {
-        // texture2D gets the appropriate pixel color from the texture
-        vec4 textureColor = texture2D(uSampler, vec2(vTextureCoord.s, vTextureCoord.t));
-        // here we incorporate the lighting equation
-        gl_FragColor = vec4(textureColor.rgb * vLightWeighting, textureColor.a);
+        // assign the pixel color to the interpolated color
+        gl_FragColor = vColor;
       }
     </script>
-    <!-- Fragment shader for gouraud shading-->
-    <!-- Vertex shader for gouraud shading-->
+    <!-- Fragment shader-->
+    <!-- Vertex shader-->
     <script id="shader-vs" type="x-shader/x-vertex">
       // Attributes are inputs provided for each vertex,
       // different for each vertex in the rendering call input: vertex position
-      attribute vec3 aVertexPosition; // vertex coordinates
+      attribute vec3 aVertexPosition;
 
-      // vertex texture
-      attribute vec2 aTextureCoord; // texture coordinates
-      varying vec2 vTextureCoord; // output texture coordinates
-
-      // normals
-      attribute vec3 aVertexNormal; // vertex normals
+      // vertex color
+      attribute vec4 aVertexColor;
+      varying vec4 vColor;
 
       // Uniforms are inputs provided for ALL vertices,
       // the same for all vertices in any rendering call
-      uniform mat4 uMVMatrix; // model-view matrix
-      uniform mat4 uPMatrix; // perspective matrix
-      uniform mat3 uNMatrix; // normal matrix
+      uniform mat4 uMVMatrix;
+      uniform mat4 uPMatrix;
 
-      // light
-      uniform vec3 uAmbientColor; // ambient light color
-      uniform vec3 uLightingDirection; // light direction
-      uniform vec3 uDirectionalColor; // directional light color
-      uniform bool uUseSpecular; // use specular lighting on or off
-      varying vec3 vLightWeighting; // output light weight
-
-      // pass through the texture coordinates from aTextureCoord to vTextureCoord
-      // the varying variable is the output
       void main(void) {
         gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
 
         // pass vertex color to fragment shader
-        vTextureCoord = aTextureCoord;
-
-        // calculate transformed vertex normal vector
-        vec3 transformedNormal = uNMatrix * aVertexNormal;
-
-        // determine the vector of incoming light
-        float directionalLightWeighting = max(dot(normalize(transformedNormal), normalize(uLightingDirection)), 0.0);
-
-        // specularity only gets calculated when selected
-        float spec = 0.0;
-
-        // if specular lighting, modify variable spec
-        if (uUseSpecular) {
-          // measure the reflection angle of the light
-          vec3 reflection = reflect(normalize(uLightingDirection), normalize(transformedNormal));
-          // get the reflection angle to the camera
-          vec3 p = (uMVMatrix * vec4(aVertexPosition, 1.0)).xyz;
-          // measure the angle
-          float dotProd = dot(normalize(reflection), normalize(p));
-          // calculate specularity
-          spec = 1.0 * 1.0 * pow(max(dotProd, 0.0), 100.0);
-        }
-
-        // calculate the light weight and pass to fragment shader
-        vLightWeighting = uAmbientColor + normalize(uDirectionalColor) * directionalLightWeighting + spec;
+        vColor = aVertexColor;
+        gl_PointSize = 10.0;
       }
     </script>
-    <!-- Vertex shader for gouraud shading-->
+    <!-- Vertex shader-->
     <!-- Fragment shader for phong shading-->
     <script id="perfrag-shader-fs" type="x-shader/x-fragment">
       // sets the precision of vColor
