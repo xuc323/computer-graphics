@@ -60,7 +60,10 @@
       uniform vec3 uAmbientColor; // ambient light color
       uniform vec3 uLightingDirection; // light direction
       uniform vec3 uDirectionalColor; // directional light color
-      uniform bool uUseSpecular; // use specular lighting on or off
+
+      // point lights
+      varying vec3 vRedLightPosition;
+      varying vec3 vBlueLightDirection;
 
       varying vec3 vPosition; // per-fragment position
       varying vec3 vTransformedNormal; // per-fragment normal
@@ -72,20 +75,28 @@
         // determine the vector of incoming light
         float directionalLightWeighting = max(dot(normalize(vTransformedNormal), normalize(uLightingDirection)), 0.0);
 
-        // specularity only gets calculated when selected
-        float specularWeight = 0.0;
-
-        // if specular lighting, modify variable specularWeight
-        if(uUseSpecular){
-          // measure the reflection angle of the light
-          vec3 reflection = reflect(normalize(uLightingDirection), normalize(vTransformedNormal));
-          // calculate specularity
-          specularWeight = pow(max(dot(normalize(reflection), normalize(vPosition)), 0.0), 100.0);
-        }
-
-        // calculate the light weight
+        // measure the reflection angle of the light
+        vec3 reflection = reflect(normalize(uLightingDirection), normalize(vTransformedNormal));
+        // calculate specularity
+        float specularWeight = pow(max(dot(normalize(reflection), normalize(vPosition)), 0.0), 50.0);
         float specularColor = 1.0 * 1.0;
-        vec3 lightWeighting = uAmbientColor + normalize(uDirectionalColor) * directionalLightWeighting + specularColor * specularWeight;
+
+        // red point light
+        float redPtLightWeight = max(dot(vTransformedNormal, normalize(vRedLightPosition - vPosition)), 0.0);
+        vec3 redPtLightColor = vec3(1.0, 0.0, 0.0);
+        vec3 redPtReflection = reflect(normalize(vRedLightPosition - vPosition), normalize(vTransformedNormal));
+        float redPtSpecularWeight = pow(max(dot(normalize(redPtReflection), normalize(vPosition)), 0.0), 50.0);
+        float redPtSpecularColor = 1.0 * 1.0;
+
+        // blue point light
+        float bluePtLightWeight = max(dot(vTransformedNormal, normalize(vBlueLightDirection - vPosition)), 0.0);
+        vec3 bluePtLightColor = vec3(0.0, 0.0, 1.0);
+        vec3 bluePtReflection = reflect(normalize(vBlueLightDirection - vPosition), vTransformedNormal);
+        float bluePtSpecularWeight = pow(max(dot(normalize(bluePtReflection), normalize(vPosition)), 0.0), 50.0);
+        float bluePtSpecularColor = 1.0 * 1.0;
+
+        // calculate light weight
+        vec3 lightWeighting = uAmbientColor + normalize(uDirectionalColor) * directionalLightWeighting + specularColor * specularWeight + redPtLightWeight * redPtLightColor + redPtSpecularColor * redPtSpecularWeight + bluePtLightWeight * bluePtLightColor + bluePtSpecularColor * bluePtSpecularWeight;
 
         // here we incorporate the lighting equation
         gl_FragColor = vec4(textureColor.rgb * lightWeighting, textureColor.a);
@@ -113,6 +124,12 @@
       uniform mat4 uPMatrix; // perspective matrix
       uniform mat3 uNMatrix; // normal matrix
 
+      // point lights
+      uniform vec3 uRedLightDirection;
+      uniform vec3 uBlueLightDirection;
+      varying vec3 vRedLightPosition;
+      varying vec3 vBlueLightDirection;
+
       void main(void) {
         gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
 
@@ -124,6 +141,10 @@
 
         // pass transformed normal to fragment shader
         vTransformedNormal = uNMatrix * aVertexNormal;
+
+        // point light positions
+        vRedLightPosition = (uMVMatrix * vec4(uRedLightDirection, 1.0)).xyz;
+        vBlueLightDirection = (uMVMatrix * vec4(uBlueLightDirection, 1.0)).xyz;
       }
     </script>
     <!-- Vertex shader for phong shading-->

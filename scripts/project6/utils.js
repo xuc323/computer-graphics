@@ -192,7 +192,6 @@ function createProgram(vertexShaderID, fragmentShaderID, index) {
     // send uniform data to the shaders
     program.nMatrixUniform = gl.getUniformLocation(program, "uNMatrix");
     program.samplerUniform = gl.getUniformLocation(program, "uSampler");
-    program.useSpecularUniform = gl.getUniformLocation(program, "uUseSpecular");
     program.ambientColorUniform = gl.getUniformLocation(
       program,
       "uAmbientColor"
@@ -204,6 +203,14 @@ function createProgram(vertexShaderID, fragmentShaderID, index) {
     program.directionalColorUniform = gl.getUniformLocation(
       program,
       "uDirectionalColor"
+    );
+    program.redLightDirectionUniform = gl.getUniformLocation(
+      program,
+      "uRedLightDirection"
+    );
+    program.blueLightDirectionUniform = gl.getUniformLocation(
+      program,
+      "uBlueLightDirection"
     );
   } else {
     // color data

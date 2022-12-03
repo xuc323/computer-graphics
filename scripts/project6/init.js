@@ -4,11 +4,17 @@
 var blueSphereBuffer = {
   positionBuffer: null, // vertex position buffer
   colorBuffer: null, // color buffer
+  x: 0.0,
+  y: -3.0,
+  z: -18.0,
 };
 
 var redSphereBuffer = {
   positionBuffer: null, //vertex position buffer
   colorBuffer: null, // color buffer
+  x: 0.0,
+  y: 3.0,
+  z: -18.0,
 };
 
 var bunneyBuffer = {
@@ -35,7 +41,7 @@ function initBuffers() {
    * START RED SPHERE BUFFER
    *************************/
   // Create a buffer for the sun's vertices.
-  let radius = 1.0,
+  let radius = 0.6,
     slices = 25,
     stacks = 12;
   // positions

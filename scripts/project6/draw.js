@@ -23,8 +23,13 @@ function drawScene() {
    * START DRAWING RED SPHERE
    ********************************/
   mat4.identity(mvMatrix);
-  mat4.translate(mvMatrix, mvMatrix, [0.0, 2.0, -20.0]);
+  mat4.translate(mvMatrix, mvMatrix, [0.0, 0.0, -20.0]);
   mat4.multiply(mvMatrix, mvMatrix, mouseRotMatrix);
+  mat4.translate(mvMatrix, mvMatrix, [
+    radius * Math.sin(degToRad(degrees)),
+    redSphereBuffer.y,
+    radius * Math.cos(degToRad(degrees)),
+  ]);
 
   // positions
   gl.bindBuffer(gl.ARRAY_BUFFER, redSphereBuffer.positionBuffer);
@@ -58,8 +63,13 @@ function drawScene() {
    * START DRAWING BLUE SPHERE
    ********************************/
   mat4.identity(mvMatrix);
-  mat4.translate(mvMatrix, mvMatrix, [0.0, -2.0, -20.0]);
+  mat4.translate(mvMatrix, mvMatrix, [0.0, 0.0, -20.0]);
   mat4.multiply(mvMatrix, mvMatrix, mouseRotMatrix);
+  mat4.translate(mvMatrix, mvMatrix, [
+    radius * Math.sin(degToRad(degrees)),
+    blueSphereBuffer.y,
+    radius * Math.cos(degToRad(degrees)),
+  ]);
 
   // positions
   gl.bindBuffer(gl.ARRAY_BUFFER, blueSphereBuffer.positionBuffer);
@@ -92,13 +102,25 @@ function drawScene() {
 
   gl.useProgram(shaderProgram);
   // set ambient light
-  gl.uniform1i(shaderProgram.useSpecularUniform, true);
   gl.uniform3fv(shaderProgram.ambientColorUniform, [0.35, 0.35, 0.35]);
 
   // set directional light
   vec3.normalize(directionalMatrix, [1.0, 1.0, 0.0]);
   gl.uniform3fv(shaderProgram.lightingDirectionUniform, directionalMatrix);
-  gl.uniform3fv(shaderProgram.directionalColorUniform, [1.0, 1.0, 1.0]);
+  gl.uniform3fv(shaderProgram.directionalColorUniform, [0.0, 1.0, 0.0]);
+
+  // set point light
+  gl.uniform3fv(shaderProgram.redLightDirectionUniform, [
+    radius * Math.sin(degToRad(degrees)),
+    redSphereBuffer.y,
+    radius * Math.cos(degToRad(degrees)),
+  ]);
+
+  gl.uniform3fv(shaderProgram.blueLightDirectionUniform, [
+    radius * Math.sin(degToRad(degrees)),
+    blueSphereBuffer.y,
+    radius * Math.cos(degToRad(degrees)),
+  ]);
 
   /*************************
    * START DRAWING BUNNY
@@ -212,10 +234,26 @@ function drawScene() {
    *************************/
 }
 
+let lastTime = 0,
+  degrees = 0;
+const rotSpeed = 30,
+  radius = 10.0;
+function animate() {
+  const timeNow = new Date().getTime();
+  if (lastTime != 0) {
+    const elapsed = timeNow - lastTime;
+    let newDegrees = (rotSpeed * elapsed) / 1000.0 + degrees;
+    if (newDegrees > 360) newDegrees -= 360;
+    degrees = newDegrees;
+  }
+  lastTime = timeNow;
+}
+
 // Handles the moment by moment re-rendering
 function tick() {
   requestAnimFrame(tick); // infinite recursive call
   resize(canvas); // resize the canvas to the window size
-  initPLY();
+  initPLY(); // load models
+  animate();
   drawScene(); // draw the scene
 }
