@@ -105,7 +105,11 @@ function drawScene() {
   gl.uniform3fv(shaderProgram.ambientColorUniform, [0.35, 0.35, 0.35]);
 
   // set directional light
-  vec3.normalize(directionalMatrix, [1.0, 1.0, 0.0]);
+  vec3.normalize(directionalMatrix, [
+    document.getElementById("directionalDirectionX").value,
+    document.getElementById("directionalDirectionY").value,
+    document.getElementById("directionalDirectionZ").value,
+  ]);
   gl.uniform3fv(shaderProgram.lightingDirectionUniform, directionalMatrix);
   gl.uniform3fv(shaderProgram.directionalColorUniform, [0.0, 1.0, 0.0]);
 
@@ -125,7 +129,8 @@ function drawScene() {
   /*************************
    * START DRAWING BUNNY
    *************************/
-  if (bunneyBuffer.loaded) {
+  const drawBunny = document.getElementById("drawBunny").checked;
+  if (bunneyBuffer.loaded && drawBunny) {
     // reset the model view matrix
     mat4.identity(mvMatrix);
     // set the position of the sphere
@@ -180,7 +185,8 @@ function drawScene() {
   /*************************
    * START DRAWING BUDDHA
    *************************/
-  if (buddhaBuffer.loaded) {
+  const drawBuddha = document.getElementById("drawBuddha").checked;
+  if (buddhaBuffer.loaded && drawBuddha) {
     // reset the model view matrix
     mat4.identity(mvMatrix);
     // set the position of the sphere

@@ -201,7 +201,45 @@
   </head>
   <body onload="webGLStart();">
     <canvas id="webGLcanvas" style="border: none"> </canvas>
-    <div class="inputs"></div>
+    <div class="inputs">
+      <div style="margin-top: 5px; margin-bottom: 5px">
+        <div style="font-weight: bold; margin-bottom: 5px">
+          Directional light direction
+        </div>
+        <label for="directionalDirectionX">X</label>
+        <input
+          type="number"
+          name="X"
+          id="directionalDirectionX"
+          value="1.0"
+          step="0.01"
+        />
+        <label for="directionalDirectionY">Y</label>
+        <input
+          type="number"
+          name="Y"
+          id="directionalDirectionY"
+          value="1.0"
+          step="0.01"
+        />
+        <label for="directionalDirectionZ">Z</label>
+        <input
+          type="number"
+          name="Z"
+          id="directionalDirectionZ"
+          value="0.0"
+          step="0.01"
+        />
+      </div>
+      <span style="margin-top: 5px; margin-bottom: 5px; font-weight: bold">
+        <label for="drawBunny">Bunny</label>
+        <input type="checkbox" name="bunny" id="drawBunny" checked />
+      </span>
+      <span style="margin-top: 5px; font-weight: bold">
+        <label for="drawBuddha">Buddha</label>
+        <input type="checkbox" name="buddha" id="drawBuddha" checked />
+      </span>
+    </div>
     <footer>
       <p style="text-align: center; margin: 0">
         Lehigh University &bullet; CSE 313 Computer Graphics &bullet; Fall 2022
