@@ -1,7 +1,6 @@
 # Computer Graphics
 
-[![stats](https://img.shields.io/website-up-down-green-red/https/computer-graphics.xchen.org)](https://computer-graphics.xchen.org)
-![example branch parameter](https://github.com/xuc323/computer-graphics/actions/workflows/static.yml/badge.svg?branch=main)
+![Website](https://img.shields.io/website?url=https://computer-graphics.xchen.org/)
 
 ## Introduction
 
