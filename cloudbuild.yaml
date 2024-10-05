@@ -1,0 +1,17 @@
+steps:
+  - name: "gcr.io/cloud-builders/docker"
+    args:
+      [
+        "build",
+        "-t",
+        "${LOCATION}-docker.pkg.dev/${PROJECT_ID}/images/${REPO_NAME}:${COMMIT_SHA}",
+        "-t",
+        "${LOCATION}-docker.pkg.dev/${PROJECT_ID}/images/${REPO_NAME}:latest",
+        ".",
+      ]
+timeout: 300s
+images:
+  - ${LOCATION}-docker.pkg.dev/${PROJECT_ID}/images/${REPO_NAME}:${COMMIT_SHA}
+  - ${LOCATION}-docker.pkg.dev/${PROJECT_ID}/images/${REPO_NAME}:latest
+options:
+  logging: CLOUD_LOGGING_ONLY
