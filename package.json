@@ -1,0 +1,20 @@
+{
+  "name": "computer-graphics",
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch server.ts",
+    "build": "tsx esbuild.config.ts",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@hono/node-server": "^1.14.3",
+    "hono": "^4.7.11"
+  },
+  "devDependencies": {
+    "@types/node": "^22.15.29",
+    "esbuild": "^0.25.5",
+    "tsx": "^4.19.4",
+    "typescript": "^5.8.3"
+  }
+}

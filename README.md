@@ -1,6 +1,6 @@
 # Computer Graphics
 
-[![stats](https://img.shields.io/website-up-down-green-red/https/computer-graphics.xchen.org)](https://computer-graphics.xchen.org)
+![Website](https://img.shields.io/website?url=https://computer-graphics.xchen.org/)
 
 ## Introduction
 
