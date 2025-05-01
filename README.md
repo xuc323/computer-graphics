@@ -1,5 +1,7 @@
 # Computer Graphics
 
+![Website](https://img.shields.io/website?url=https://computer-graphics.xchen.org/)
+
 ## Introduction
 
 This is a repository for my computer graphics course. It contains all the sources code for the projects from this course.
